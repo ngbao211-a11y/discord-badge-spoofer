@@ -465,11 +465,11 @@ function connectSSE() {
 }
 
 function updateConnectionBadge(isConnected) {
-    const badge = topbar-conn-badge;
-    const label = topbar-conn-label;
-    const termStatus = term-live-status;
-    const statusText = status-text;
-    const statusDot = status-dot;
+    const badge = $('topbar-conn-badge');
+    const label = $('topbar-conn-label');
+    const termStatus = $('term-live-status');
+    const statusText = $('status-text');
+    const statusDot = $('status-dot');
     const isVercel = window.location.hostname.includes('vercel.app') || (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1');
 
     if (badge) {
@@ -539,8 +539,8 @@ function updateStatus(newStatus) {
     if ($('term-client-id')) $('term-client-id').textContent = `clientId: ${CLIENT_ID}`;
 
     // Status Dot & Indicator
-    const statusDot = status-dot;
-    const statusText = status-text;
+    const statusDot = $('status-dot');
+    const statusText = $('status-text');
 
     if (state.status.is_running) {
         state.status.status_text = 'Đang chạy...';
