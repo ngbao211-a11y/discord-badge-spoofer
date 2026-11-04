@@ -382,8 +382,7 @@ function closeAllModals() {
 // ── 7. HTTP API Client ─────────────────────────────────────────────────────
 
 async function fetchApi(endpoint, method = 'GET', body = null) {
-    const sep = endpoint.includes('?') ? '&' : '?';
-    const url = `/api/${endpoint}${sep}clientId=${encodeURIComponent(CLIENT_ID)}`;
+    const url = `/api/${endpoint}`;
     const options = {
         method,
         headers: { 'Content-Type': 'application/json' }
@@ -473,12 +472,13 @@ function updateConnectionBadge(isConnected) {
 
     if (badge) {
         badge.classList.toggle('error', !isConnected);
+        badge.classList.toggle('online', isConnected);
     }
     if (label) {
         if (isConnected) {
-            label.textContent = isVercel ? 'Online (Vercel Cloud)' : 'Online (Cục bộ)';
+            label.textContent = isVercel ? 'Online (Cloud)' : 'Online (Cục bộ)';
         } else {
-            label.textContent = 'Mất kết nối';
+            label.textContent = 'Đang kết nối...';
         }
     }
     if (termStatus) {
@@ -2117,6 +2117,15 @@ async function initApplication() {
 
     // Connect SSE Stream
     connectSSE();
+
+    // Immediately confirm connection status (required for Vercel Serverless)
+    setTimeout(async () => {
+        const res = await fetchApi('status');
+        if (res.ok) {
+            updateConnectionBadge(true);
+            if (res.data) updateStatus(res.data);
+        }
+    }, 500);
 
     // Preload games library in background so 10,464 games are ready instantly
     fetchGamesList('');
