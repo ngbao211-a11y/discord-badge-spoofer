@@ -2,11 +2,14 @@ from http.server import BaseHTTPRequestHandler
 import json
 import urllib.parse
 from pathlib import Path
+import mimetypes
 import os
 import sys
 
-# Add parent directory to path so core_engine can be imported
-sys.path.insert(0, str(Path(__file__).parent.parent))
+BASE_DIR = Path(__file__).parent.parent
+PUBLIC_DIR = BASE_DIR / "public"
+if not PUBLIC_DIR.exists():
+    PUBLIC_DIR = BASE_DIR / "web" / "static"
 
 class handler(BaseHTTPRequestHandler):
     def end_headers(self):
@@ -23,7 +26,8 @@ class handler(BaseHTTPRequestHandler):
         parsed = urllib.parse.urlparse(self.path)
         qs = urllib.parse.parse_qs(parsed.query)
 
-        if parsed.path.endswith("/status"):
+        # 1. API: status
+        if parsed.path == "/api/status" or parsed.path.endswith("/status"):
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.end_headers()
@@ -44,8 +48,13 @@ class handler(BaseHTTPRequestHandler):
                 "user_id": None,
                 "deployment": "vercel-cloud"
             }).encode("utf-8"))
-        elif parsed.path.endswith("/games"):
-            games_file = Path(__file__).parent.parent / "games.json"
+            return
+
+        # 2. API: games
+        if parsed.path == "/api/games" or parsed.path.endswith("/games"):
+            games_file = BASE_DIR / "data" / "games.json"
+            if not games_file.exists():
+                games_file = BASE_DIR / "games.json"
             games_data = []
             if games_file.exists():
                 try:
@@ -59,13 +68,50 @@ class handler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(json.dumps({
                 "total": len(games_data),
-                "games": games_data[:1000] if len(games_data) > 1000 else games_data
+                "games": games_data
             }).encode("utf-8"))
+            return
+
+        # 3. Static Web Interface fallback: Serve index.html or requested static file
+        rel_path = parsed.path.lstrip("/")
+        if not rel_path or rel_path == "index.html":
+            file_path = PUBLIC_DIR / "index.html"
         else:
+            file_path = PUBLIC_DIR / rel_path
+            if not file_path.exists() and rel_path.startswith("static/"):
+                file_path = PUBLIC_DIR / rel_path[len("static/"):]
+
+        if file_path.exists() and file_path.is_file():
+            mime, _ = mimetypes.guess_type(str(file_path))
+            if not mime:
+                if str(file_path).endswith(".svg"):
+                    mime = "image/svg+xml"
+                elif str(file_path).endswith(".css"):
+                    mime = "text/css"
+                elif str(file_path).endswith(".js"):
+                    mime = "application/javascript"
+                else:
+                    mime = "application/octet-stream"
+
             self.send_response(200)
-            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Type", mime)
             self.end_headers()
-            self.wfile.write(json.dumps({"status": "online", "mode": "vercel-serverless"}).encode("utf-8"))
+            self.wfile.write(file_path.read_bytes())
+            return
+
+        # If not found, serve index.html by default
+        index_file = PUBLIC_DIR / "index.html"
+        if index_file.exists():
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.end_headers()
+            self.wfile.write(index_file.read_bytes())
+            return
+
+        self.send_response(404)
+        self.send_header("Content-Type", "application/json")
+        self.end_headers()
+        self.wfile.write(json.dumps({"error": "Not found"}).encode("utf-8"))
 
     def do_POST(self):
         self.send_response(200)
