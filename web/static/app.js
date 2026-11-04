@@ -1,4 +1,4 @@
-/* ==========================================================================
+﻿/* ==========================================================================
    Discord Badge Spoofer — Premium AAA Client Application (app.js)
    Engineered for Fluidity, Local Security & High Performance
    ========================================================================== */
@@ -484,7 +484,7 @@ function updateConnectionBadge(isConnected) {
         }
     }
     if (termStatus) {
-        termStatus.textContent = isConnected ? (isVercel ? '● Vercel Serverless Online' : '● SSE Connected') : '○ Reconnecting...';
+        termStatus.textContent = isConnected ? (isVercel ? '●'• Vercel Serverless Online' : '● SSE Connected') : '○ Reconnecting...';
         termStatus.style.color = isConnected ? 'var(--accent-green)' : 'var(--accent-red)';
     }
 
@@ -2108,17 +2108,9 @@ async function initApplication() {
         }
     } catch (e) {}
 
-    // Connect SSE Stream
-    connectSSE();
-
-    // Immediately confirm connection status (required for Vercel Serverless)
-    setTimeout(async () => {
-        const res = await fetchApi('status');
-        if (res.ok) {
-            updateConnectionBadge(true);
-            if (res.data) updateStatus(res.data);
-        }
-    }, 500);
+    // On Vercel: no SSE, use immediate + heartbeat
+    updateConnectionBadge(true);
+    startHeartbeat();
 
     // Preload games library in background so 10,464 games are ready instantly
     // Games library page removed for optimal zero-lag performance
@@ -2149,3 +2141,6 @@ if (document.readyState === 'loading') {
 } else {
     initApplication();
 }
+
+
+

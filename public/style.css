@@ -1,4 +1,4 @@
-/* ==========================================================================
+﻿/* ==========================================================================
    Discord Badge Spoofer — Premium AAA Dashboard Stylesheet
    Designed for High Performance, Fluid Micro-interactions & Visual Polish
    ========================================================================== */
@@ -195,7 +195,7 @@ kbd {
     width: 500px;
     height: 500px;
     border-radius: 50%;
-    filter: blur(120px);
+    
     pointer-events: none;
     z-index: 0;
     opacity: 0.35;
@@ -250,7 +250,7 @@ kbd {
     flex-direction: column;
     align-items: center;
     background: var(--surface-1);
-    backdrop-filter: blur(20px);
+    
     border-right: 1px solid var(--border-subtle);
     padding: 16px 0;
     z-index: 20;
@@ -302,7 +302,7 @@ kbd {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all var(--trans-fast);
+    transition: background-color var(--trans-fast), border-color var(--trans-fast), color var(--trans-fast), opacity var(--trans-fast);
 }
 
 .rail-btn:hover {
@@ -354,7 +354,7 @@ kbd {
     top: 50%;
     transform: translateY(-50%) translateX(-6px);
     background: var(--surface-1);
-    backdrop-filter: blur(14px);
+    
     color: var(--text-1);
     border: 1px solid var(--border-medium);
     border-radius: var(--radius-sm);
@@ -396,7 +396,7 @@ kbd {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all var(--trans-fast);
+    transition: background-color var(--trans-fast), border-color var(--trans-fast), color var(--trans-fast), opacity var(--trans-fast);
 }
 .rail-btn-aux:hover {
     color: var(--text-1);
@@ -414,7 +414,7 @@ kbd {
     display: flex;
     flex-direction: column;
     background: var(--surface-2);
-    backdrop-filter: blur(24px);
+    
     border-right: 1px solid var(--border-subtle);
     padding: 20px 18px;
     overflow-y: auto;
@@ -561,7 +561,7 @@ kbd {
     color: var(--text-1);
     cursor: pointer;
     text-align: left;
-    transition: all var(--trans-fast);
+    transition: background-color var(--trans-fast), border-color var(--trans-fast), color var(--trans-fast), opacity var(--trans-fast);
 }
 .auth-pill-item:hover {
     background: var(--surface-hover);
@@ -758,7 +758,7 @@ kbd {
     justify-content: space-between;
     padding: 0 28px;
     background: rgba(3, 5, 7, 0.7);
-    backdrop-filter: blur(20px);
+    
     border-bottom: 1px solid var(--border-subtle);
     z-index: 30;
 }
@@ -805,7 +805,7 @@ kbd {
     font-size: 12px;
     font-weight: 500;
     cursor: pointer;
-    transition: all var(--trans-fast);
+    transition: background-color var(--trans-fast), border-color var(--trans-fast), color var(--trans-fast), opacity var(--trans-fast);
 }
 .topbar-tool-btn:hover {
     color: var(--text-1);
@@ -873,7 +873,7 @@ kbd {
 /* Generic Glass Panel */
 .glass-panel {
     background: var(--surface-glass);
-    backdrop-filter: blur(20px);
+    
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-xl);
     box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35);
@@ -897,7 +897,7 @@ kbd {
     position: relative;
     padding: 20px;
     background: var(--surface-glass);
-    backdrop-filter: blur(16px);
+    
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-lg);
     box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
@@ -1079,7 +1079,7 @@ kbd {
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
-    transition: all var(--trans-fast);
+    transition: background-color var(--trans-fast), border-color var(--trans-fast), color var(--trans-fast), opacity var(--trans-fast);
 }
 .mode-tab:hover {
     color: var(--text-1);
@@ -1143,7 +1143,7 @@ kbd {
     font-weight: 600;
     color: var(--text-1);
     outline: none;
-    transition: all var(--trans-fast);
+    transition: background-color var(--trans-fast), border-color var(--trans-fast), color var(--trans-fast), opacity var(--trans-fast);
 }
 .styled-input-lg:focus {
     border-color: var(--primary);
@@ -1175,7 +1175,7 @@ kbd {
     font-size: 11.5px;
     font-weight: 600;
     cursor: pointer;
-    transition: all var(--trans-fast);
+    transition: background-color var(--trans-fast), border-color var(--trans-fast), color var(--trans-fast), opacity var(--trans-fast);
 }
 .chip-preset:hover, .chip-preset-hour:hover {
     color: var(--text-1);
@@ -1254,14 +1254,14 @@ kbd {
     border-radius: var(--radius-xl);
     background: linear-gradient(90deg, var(--primary), var(--accent-cyan), var(--primary));
     background-size: 200% 100%;
-    filter: blur(14px);
+    
     opacity: 0.6;
     animation: glowMove 4s linear infinite;
     transition: opacity var(--trans-normal);
 }
 .btn-mega-run:hover .btn-mega-glow {
     opacity: 0.95;
-    filter: blur(20px);
+    
 }
 @keyframes glowMove {
     0% { background-position: 0% 50%; }
@@ -1286,7 +1286,7 @@ kbd {
     height: calc(100% - 3px);
     border-radius: calc(var(--radius-xl) - 1.5px);
     background: linear-gradient(135deg, rgba(30, 24, 60, 0.95) 0%, rgba(14, 16, 28, 0.95) 100%);
-    backdrop-filter: blur(12px);
+    
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1330,8 +1330,8 @@ kbd {
     animation: glowPulseRed 1.8s ease-in-out infinite alternate !important;
 }
 @keyframes glowPulseRed {
-    0% { opacity: 0.6; filter: blur(12px); }
-    100% { opacity: 1; filter: blur(24px); }
+    0% { opacity: 0.6;  }
+    100% { opacity: 1;  }
 }
 .stop-border {
     background: linear-gradient(90deg, rgba(255, 255, 255, 0.4), var(--accent-red), rgba(255, 255, 255, 0.4)) !important;
@@ -1522,7 +1522,7 @@ kbd {
     font-size: 14px;
     color: var(--text-1);
     outline: none;
-    transition: all var(--trans-fast);
+    transition: background-color var(--trans-fast), border-color var(--trans-fast), color var(--trans-fast), opacity var(--trans-fast);
 }
 .search-input:focus {
     border-color: var(--primary);
@@ -1603,7 +1603,7 @@ kbd {
     border-radius: var(--radius-xs);
     color: var(--text-3);
     cursor: pointer;
-    transition: all var(--trans-fast);
+    transition: background-color var(--trans-fast), border-color var(--trans-fast), color var(--trans-fast), opacity var(--trans-fast);
 }
 .view-btn:hover {
     color: var(--text-1);
@@ -1624,7 +1624,7 @@ kbd {
     position: relative;
     padding: 16px;
     background: var(--surface-glass);
-    backdrop-filter: blur(14px);
+    
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-lg);
     display: flex;
@@ -1703,7 +1703,7 @@ kbd {
     justify-content: center;
     cursor: pointer;
     flex-shrink: 0;
-    transition: all var(--trans-fast);
+    transition: background-color var(--trans-fast), border-color var(--trans-fast), color var(--trans-fast), opacity var(--trans-fast);
 }
 .game-card.selected .game-card-select-checkbox {
     background: var(--primary);
@@ -1716,7 +1716,7 @@ kbd {
     color: #fff;
     opacity: 0;
     transform: scale(0.5);
-    transition: all var(--trans-fast);
+    transition: background-color var(--trans-fast), border-color var(--trans-fast), color var(--trans-fast), opacity var(--trans-fast);
 }
 .game-card.selected .game-card-select-checkbox::after {
     opacity: 1;
@@ -2016,7 +2016,7 @@ kbd {
     border-radius: var(--radius-lg);
     display: flex;
     gap: 14px;
-    transition: all var(--trans-fast);
+    transition: background-color var(--trans-fast), border-color var(--trans-fast), color var(--trans-fast), opacity var(--trans-fast);
 }
 .badge-card.unlocked {
     background: rgba(124, 92, 252, 0.08);
@@ -2173,7 +2173,7 @@ kbd {
     border-radius: var(--radius-md);
     text-align: left;
     cursor: pointer;
-    transition: all var(--trans-fast);
+    transition: background-color var(--trans-fast), border-color var(--trans-fast), color var(--trans-fast), opacity var(--trans-fast);
 }
 .theme-card:hover {
     background: var(--surface-hover);
@@ -2391,7 +2391,7 @@ kbd {
     font-weight: 600;
     color: var(--text-3);
     cursor: pointer;
-    transition: all var(--trans-fast);
+    transition: background-color var(--trans-fast), border-color var(--trans-fast), color var(--trans-fast), opacity var(--trans-fast);
 }
 .lf-btn:hover {
     color: var(--text-1);
@@ -2436,7 +2436,7 @@ kbd {
     font-size: 11.5px;
     font-weight: 500;
     cursor: pointer;
-    transition: all var(--trans-fast);
+    transition: background-color var(--trans-fast), border-color var(--trans-fast), color var(--trans-fast), opacity var(--trans-fast);
 }
 .term-action-btn:hover {
     color: var(--text-1);
@@ -2556,7 +2556,7 @@ kbd {
     cursor: pointer;
     border: none;
     outline: none;
-    transition: all var(--trans-fast);
+    transition: background-color var(--trans-fast), border-color var(--trans-fast), color var(--trans-fast), opacity var(--trans-fast);
     overflow: hidden;
 }
 .btn:hover {
@@ -2601,7 +2601,7 @@ kbd {
     font-size: 11.5px;
     font-weight: 500;
     cursor: pointer;
-    transition: all var(--trans-fast);
+    transition: background-color var(--trans-fast), border-color var(--trans-fast), color var(--trans-fast), opacity var(--trans-fast);
 }
 .btn-outline-xs:hover {
     background: var(--surface-hover);
@@ -2622,7 +2622,7 @@ kbd {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    transition: all var(--trans-fast);
+    transition: background-color var(--trans-fast), border-color var(--trans-fast), color var(--trans-fast), opacity var(--trans-fast);
 }
 
 .btn-danger-sm {
@@ -2637,7 +2637,7 @@ kbd {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    transition: all var(--trans-fast);
+    transition: background-color var(--trans-fast), border-color var(--trans-fast), color var(--trans-fast), opacity var(--trans-fast);
 }
 .btn-danger-sm:hover {
     background: var(--accent-red);
@@ -2678,7 +2678,7 @@ kbd {
     inset: 0;
     z-index: 1000;
     background: rgba(3, 5, 7, 0.75);
-    backdrop-filter: blur(16px);
+    
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2696,7 +2696,7 @@ kbd {
     position: relative;
     width: 100%;
     background: var(--surface-1);
-    backdrop-filter: blur(28px);
+    
     border: 1px solid var(--border-medium);
     border-radius: var(--radius-xl);
     box-shadow: 0 32px 64px rgba(0, 0, 0, 0.65);
@@ -2758,7 +2758,7 @@ kbd {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all var(--trans-fast);
+    transition: background-color var(--trans-fast), border-color var(--trans-fast), color var(--trans-fast), opacity var(--trans-fast);
 }
 .modal-close-btn:hover {
     background: var(--surface-hover);
@@ -2817,7 +2817,7 @@ kbd {
     font-size: 13.5px;
     color: var(--text-1);
     outline: none;
-    transition: all var(--trans-fast);
+    transition: background-color var(--trans-fast), border-color var(--trans-fast), color var(--trans-fast), opacity var(--trans-fast);
 }
 .styled-input:focus {
     border-color: var(--primary);
@@ -2964,7 +2964,7 @@ kbd {
     max-width: 440px;
     padding: 14px 18px;
     background: var(--surface-1);
-    backdrop-filter: blur(24px);
+    
     border: 1px solid var(--border-medium);
     border-radius: var(--radius-lg);
     box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5);
@@ -3246,8 +3246,8 @@ kbd {
     border: 1px solid rgba(88, 101, 242, 0.35);
     padding: 5px 14px 5px 6px;
     border-radius: 20px;
-    backdrop-filter: blur(8px);
-    transition: all 0.25s ease;
+    
+    transition: background-color 0.25s, border-color 0.25s, color 0.25s, opacity 0.25s;
     cursor: pointer;
 }
 
@@ -3301,7 +3301,7 @@ kbd {
     border-radius: 12px;
     cursor: pointer;
     margin-left: 2px;
-    transition: all 0.2s ease;
+    transition: background-color 0.2s, border-color 0.2s, color 0.2s, opacity 0.2s;
 }
 
 .btn-sync-discord:hover {
@@ -3529,7 +3529,7 @@ kbd {
     border: 1px solid rgba(139, 92, 246, 0.35);
     border-radius: 10px;
     cursor: pointer;
-    transition: all 0.25s ease;
+    transition: background-color 0.25s, border-color 0.25s, color 0.25s, opacity 0.25s;
 }
 .btn-load-more-games:hover {
     background: rgba(139, 92, 246, 0.3);
@@ -3657,7 +3657,7 @@ kbd {
     font-size: 13.5px;
     font-weight: 700;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: background-color 0.2s, border-color 0.2s, color 0.2s, opacity 0.2s;
     text-align: center;
 }
 
@@ -3748,7 +3748,7 @@ kbd {
     height: 140px;
     background: radial-gradient(ellipse at center, rgba(254, 240, 138, 0.45) 0%, rgba(245, 158, 11, 0.25) 45%, rgba(6, 182, 212, 0.15) 75%, transparent 100%);
     border-radius: 50%;
-    filter: blur(20px);
+    
     z-index: 1;
     pointer-events: none;
     animation: auraPulse 3s ease-in-out infinite alternate;
@@ -3879,7 +3879,7 @@ kbd {
     text-align: center;
     padding: 10px 8px;
     border-radius: 10px;
-    transition: all 0.25s ease;
+    transition: background-color 0.25s, border-color 0.25s, color 0.25s, opacity 0.25s;
     user-select: none;
     width: 100%;
 }
@@ -3927,7 +3927,7 @@ kbd {
     font-size: 11.5px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: background-color 0.2s, border-color 0.2s, color 0.2s, opacity 0.2s;
 }
 
 .btn-preset-chip:hover {
@@ -3954,7 +3954,7 @@ kbd {
     height: 140px;
     border-radius: 50%;
     background: radial-gradient(ellipse at center, rgba(254, 240, 138, 0.5) 0%, rgba(245, 158, 11, 0.3) 45%, rgba(6, 182, 212, 0.18) 75%, transparent 100%);
-    filter: blur(24px);
+    
     z-index: 1;
     pointer-events: none;
     animation: celestialAuraPulse 3.5s ease-in-out infinite alternate;
@@ -3966,7 +3966,7 @@ kbd {
     height: 140px;
     border-radius: 50%;
     background: radial-gradient(ellipse at center, rgba(253, 224, 71, 0.5) 0%, rgba(249, 115, 22, 0.35) 45%, rgba(168, 85, 247, 0.2) 75%, transparent 100%);
-    filter: blur(24px);
+    
     z-index: 1;
     pointer-events: none;
     animation: celestialAuraPulse 3.5s ease-in-out infinite alternate;
@@ -4028,10 +4028,10 @@ kbd {
     width: 100px;
     height: 100px;
     border-radius: 50%;
-    filter: blur(16px);
+    
     z-index: 1;
     pointer-events: none;
-    transition: all 0.3s ease;
+    transition: background-color 0.3s, border-color 0.3s, color 0.3s, opacity 0.3s;
 }
 
 .discord-hero-glow.gold-glow {
@@ -4041,3 +4041,4 @@ kbd {
 .discord-hero-glow.normal-glow {
     background: radial-gradient(circle, rgba(88, 101, 242, 0.4) 0%, rgba(56, 189, 248, 0.2) 50%, transparent 75%);
 }
+
