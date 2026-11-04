@@ -335,12 +335,6 @@
                 </button>
 
                 <!-- 2. Game Library -->
-                <button class="rail-btn" data-page="games" title="Kho game Discord (Ctrl+2)">
-                    <div class="rail-btn-icon">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="6 2 18 2 18 6 6 6 6 2"/><rect x="3" y="6" width="18" height="16" rx="2"/><circle cx="8" cy="14" r="1.5" fill="currentColor"/><circle cx="16" cy="14" r="1.5" fill="currentColor"/><path d="M12 12v4M10 14h4"/></svg>
-                    </div>
-                    <span class="rail-tooltip">Kho Game <kbd>Ctrl+2</kbd></span>
-                </button>
 
                 <!-- 3. Statistics -->
                 <button class="rail-btn" data-page="stats" title="Thống kê & Danh hiệu (Ctrl+3)">
@@ -799,86 +793,6 @@
                         </div>
                         <div class="dash-console-body custom-scroll font-mono" id="dash-mini-console">
                             <!-- Mini logs stream injected here -->
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- ================= PAGE 2: KHO GAME (GAME LIBRARY) ================= -->
-            <section class="page-view" id="page-games">
-                <div class="page-content-wrapper">
-                    
-                    <!-- Library Control Bar -->
-                    <div class="library-toolbar-card glass-panel">
-                        <div class="lib-toolbar-top">
-                            <div class="lib-search-box">
-                                <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                                <input type="text" id="input-game-search" class="search-input" placeholder="Tìm game theo tên, executable hoặc Game ID... (phím /)" autocomplete="off">
-                                <button type="button" class="search-clear-btn hidden" id="btn-clear-search" title="Xoá tìm kiếm">✕</button>
-                            </div>
-                            <div class="lib-stats-badge">
-                                <span class="lsb-num font-mono" id="lib-total-badge">10,464</span>
-                                <span class="lsb-text">Games Sẵn Sàng</span>
-                            </div>
-                        </div>
-
-                        <div class="lib-toolbar-bottom">
-                            <!-- Left: Selection controls -->
-                            <div class="lib-selection-actions">
-                                <button type="button" class="btn btn-outline-xs" id="btn-select-all-visible">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-                                    <span>Chọn tất cả đang hiện</span>
-                                </button>
-                                <button type="button" class="btn btn-outline-xs" id="btn-deselect-all">
-                                    <span>Bỏ chọn</span>
-                                </button>
-                                <span class="selected-counter-badge hidden" id="selected-counter-badge">Đã chọn: <strong id="selected-count-num">0</strong> game</span>
-                            </div>
-
-                            <!-- Right: View switchers & Quick Action -->
-                            <div class="lib-view-actions">
-                                <button type="button" class="btn btn-primary-xs hidden" id="btn-spoof-selected">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                                    <span>Cày riêng game đã chọn</span>
-                                </button>
-                                
-                                <div class="view-mode-toggle">
-                                    <button type="button" class="view-btn active" id="btn-view-grid" title="Dạng lưới (Grid)">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-                                    </button>
-                                    <button type="button" class="view-btn" id="btn-view-list" title="Dạng danh sách (List)">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Games List / Grid View Area -->
-                    <div class="games-display-container">
-                        <!-- Loading Skeleton -->
-                        <div class="games-skeleton-grid hidden" id="games-skeleton">
-                            <div class="skeleton-card"></div>
-                            <div class="skeleton-card"></div>
-                            <div class="skeleton-card"></div>
-                            <div class="skeleton-card"></div>
-                            <div class="skeleton-card"></div>
-                            <div class="skeleton-card"></div>
-                            <div class="skeleton-card"></div>
-                            <div class="skeleton-card"></div>
-                        </div>
-
-                        <!-- Rendered Games Target -->
-                        <div class="games-grid-view" id="games-grid-target">
-                            <!-- Injected by JavaScript -->
-                        </div>
-
-                        <!-- Empty state if no games match search -->
-                        <div class="games-empty-state hidden" id="games-empty-state">
-                            <div class="empty-icon">🔍</div>
-                            <h3>Không tìm thấy trò chơi phù hợp</h3>
-                            <p>Hãy thử tìm từ khoá khác hoặc xoá tìm kiếm để xem toàn bộ danh mục.</p>
-                            <button type="button" class="btn btn-outline-sm" id="btn-reset-search">Xem tất cả</button>
                         </div>
                     </div>
                 </div>

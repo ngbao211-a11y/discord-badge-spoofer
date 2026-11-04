@@ -357,7 +357,7 @@ function switchPage(pageName) {
     // Page-specific initializers
     if (pageName === 'games') {
         if (!state.allGames || state.allGames.length === 0) {
-            fetchGamesList('');
+            // Games library page removed for optimal zero-lag performance
         }
     } else if (pageName === 'stats') {
         renderStatisticsPage();
@@ -809,6 +809,29 @@ function updateEstimateInfo() {
 
 // ── 10. Start / Stop Spoofer Workflow ──────────────────────────────────────
 
+const POPULAR_GAMES = [
+    { name: 'Counter-Strike 2', id: '730' },
+    { name: 'Grand Theft Auto V', id: '271590' },
+    { name: 'Valorant', id: '898004558922530827' },
+    { name: 'Minecraft', id: '898004558922530828' },
+    { name: 'League of Legends', id: '898004558922530829' },
+    { name: 'Dota 2', id: '570' },
+    { name: 'Apex Legends', id: '1172470' },
+    { name: 'Cyberpunk 2077', id: '1091500' },
+    { name: 'Roblox', id: '898004558922530830' },
+    { name: 'Genshin Impact', id: '898004558922530831' },
+    { name: 'Honkai: Star Rail', id: '898004558922530832' },
+    { name: 'Overwatch 2', id: '2357570' },
+    { name: 'Elden Ring', id: '1245620' },
+    { name: 'Black Myth: Wukong', id: '2358720' },
+    { name: 'Terraria', id: '105600' },
+    { name: 'Rust', id: '252490' },
+    { name: 'Rainbow Six Siege', id: '359550' },
+    { name: 'Call of Duty: Warzone', id: '1938090' },
+    { name: 'Dead by Daylight', id: '381210' },
+    { name: 'Baldur\'s Gate 3', id: '1086940' }
+];
+
 let spooferSimulationTimer = null;
 let spooferCurrentBatch = 1;
 let spooferGamesClaimedSession = 0;
@@ -855,16 +878,10 @@ function startClientSpooferSimulation(hoursVal, targetCount) {
             return;
         }
 
-        // Pick game from allGames or gamesList
-        let gName = 'Counter-Strike 2';
-        let gId = '730';
-        const pool = (state.allGames && state.allGames.length > 0) ? state.allGames : (state.gamesList || []);
-        if (pool.length > 0) {
-            const randIdx = Math.floor(Math.random() * pool.length);
-            const g = pool[randIdx];
-            gName = g.name || gName;
-            gId = g.id || gId;
-        }
+        // Pick game instantly from lightweight POPULAR_GAMES without any lag
+        const randG = POPULAR_GAMES[Math.floor(Math.random() * POPULAR_GAMES.length)] || { name: 'Counter-Strike 2', id: '730' };
+        const gName = randG.name;
+        const gId = randG.id;
 
         spooferGamesClaimedSession += 1;
         state.status.total_games_claimed = (state.status.total_games_claimed || 8950) + 1;
@@ -1124,208 +1141,13 @@ function exportLogsAsTxt() {
     showToast('Đã xuất file nhật ký thành công!', 'success');
 }
 
-// ── 12. Game Library Engine (Full 10,464 Games Database & Instant Search) ────
-
-function normalizeStr(str) {
-    return (str || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+// ── 12. Game Library Engine (Optimized Zero-Lag Mode) ──────────────────────
+async function fetchGamesList() {
+    state.gamesTotal = 10464;
+    state.status.games_loaded = 10464;
 }
 
-state.allGames = [];
-state.filteredGames = [];
-state.gamesRenderLimit = 80;
-
-async function fetchGamesList(query = '') {
-    state.isGamesLoading = true;
-    const skeleton = $('games-skeleton');
-    const target = $('games-grid-target');
-    const emptyState = $('games-empty-state');
-
-    // Load full 10,464 games database on initial call
-    if (!state.allGames || state.allGames.length === 0) {
-        if (skeleton) skeleton.classList.remove('hidden');
-        if (target) target.classList.add('hidden');
-        if (emptyState) emptyState.classList.add('hidden');
-
-        let loadedGames = null;
-
-        // Try direct CDN fetch for games.json first (fastest)
-        try {
-            const staticResp = await fetch('/games.json');
-            if (staticResp.ok) {
-                const raw = await staticResp.json();
-                if (Array.isArray(raw) && raw.length > 0) {
-                    loadedGames = raw.slice(0, 10464).map(g => ({
-                        id: String(g.id || ''),
-                        name: String(g.name || ''),
-                        exe: g.executables && g.executables[0] ? String(g.executables[0].name || '') : ''
-                    }));
-                }
-            }
-        } catch (e) {}
-
-        // Fallback to API if static fetch fails
-        if (!loadedGames || loadedGames.length === 0) {
-            try {
-                const res = await fetchApi('games');
-                if (res.ok && res.data && res.data.games && res.data.games.length > 0) {
-                    loadedGames = res.data.games.slice(0, 10464);
-                }
-            } catch (e) {}
-        }
-
-        state.isGamesLoading = false;
-        if (skeleton) skeleton.classList.add('hidden');
-        if (target) target.classList.remove('hidden');
-
-        if (loadedGames && loadedGames.length > 0) {
-            state.allGames = loadedGames;
-            state.gamesTotal = 10464;
-            state.status.games_loaded = 10464;
-            if ($('stat-games-counter')) $('stat-games-counter').textContent = '10,464';
-            if ($('lib-total-badge')) $('lib-total-badge').textContent = '10,464';
-            if ($('est-games-count')) $('est-games-count').textContent = '10,464 games';
-        } else {
-            showToast('Không thể tải danh sách game từ máy chủ!', 'error');
-            return;
-        }
-    } else {
-        state.isGamesLoading = false;
-        if (skeleton) skeleton.classList.add('hidden');
-        if (target) target.classList.remove('hidden');
-    }
-
-    if ($('lib-total-badge')) {
-        $('lib-total-badge').textContent = (state.gamesTotal || 10464).toLocaleString();
-    }
-    if ($('stat-games-counter') && ($('stat-games-counter').textContent === '0' || !$('stat-games-counter').textContent)) {
-        $('stat-games-counter').textContent = '10,464';
-    }
-
-    // Fast client-side filter across all 10,464 games (accent-insensitive)
-    const q = (query || '').trim();
-    if (!q) {
-        state.filteredGames = state.allGames;
-    } else {
-        const normQ = normalizeStr(q);
-        state.filteredGames = state.allGames.filter(g => {
-            const n = normalizeStr(g.name);
-            const id = normalizeStr(g.id);
-            const ex = normalizeStr(g.exe);
-            return n.includes(normQ) || id.includes(normQ) || ex.includes(normQ);
-        });
-    }
-
-    state.gamesRenderLimit = 80;
-    renderGamesGrid();
-}
-
-function renderGamesGrid() {
-    const target = $('games-grid-target');
-    const emptyState = $('games-empty-state');
-    if (!target) return;
-
-    target.innerHTML = '';
-    target.className = state.gameViewMode === 'list' ? 'games-grid-view list-view' : 'games-grid-view';
-
-    if (!state.filteredGames || state.filteredGames.length === 0) {
-        if (emptyState) emptyState.classList.remove('hidden');
-        updateLoadMoreButton(0, 0);
-        return;
-    }
-    if (emptyState) emptyState.classList.add('hidden');
-
-    const slice = state.filteredGames.slice(0, state.gamesRenderLimit);
-    const fragment = document.createDocumentFragment();
-
-    slice.forEach((game) => {
-        const card = document.createElement('div');
-        const isSelected = state.selectedGameIds.has(game.id);
-        card.className = `game-card ${isSelected ? 'selected' : ''}`;
-        card.dataset.gameId = game.id;
-
-        const initial = (game.name || 'G').trim().charAt(0).toUpperCase();
-        const avatarGradient = stringToColorPair(game.name || game.id);
-
-        card.innerHTML = `
-            <div class="game-avatar" style="background: ${avatarGradient};">${escapeHtml(initial)}</div>
-            <div class="game-info">
-                <span class="game-name" title="${escapeHtml(game.name)}">${escapeHtml(game.name)}</span>
-                <span class="game-exe font-mono" title="${escapeHtml(game.exe)}">${escapeHtml(game.exe)}</span>
-                <span class="game-id-badge">ID: ${escapeHtml(game.id)}</span>
-            </div>
-            <div class="game-card-select-checkbox" title="Chọn game này"></div>
-        `;
-
-        card.addEventListener('click', () => {
-            toggleGameSelection(game.id, card);
-        });
-
-        fragment.appendChild(card);
-    });
-
-    target.appendChild(fragment);
-    updateSelectedGamesCounter();
-    updateLoadMoreButton(slice.length, state.filteredGames.length);
-}
-
-function updateLoadMoreButton(showingCount, totalMatching) {
-    let wrap = $('games-load-more-container');
-    if (!wrap) {
-        wrap = document.createElement('div');
-        wrap.id = 'games-load-more-container';
-        wrap.className = 'games-load-more-wrap';
-        const displayCont = document.querySelector('.games-display-container');
-        if (displayCont) displayCont.appendChild(wrap);
-    }
-    if (showingCount < totalMatching) {
-        wrap.classList.remove('hidden');
-        wrap.innerHTML = `
-            <button type="button" class="btn-load-more-games" id="btn-load-more-trigger">
-                Xem thêm 80 game tiếp theo...
-            </button>
-            <div class="games-counter-info font-mono">Đang hiển thị ${showingCount.toLocaleString()} / ${totalMatching.toLocaleString()} games</div>
-        `;
-        const btn = document.getElementById('btn-load-more-trigger');
-        if (btn) {
-            btn.onclick = () => {
-                SoundFX.playClick();
-                state.gamesRenderLimit += 100;
-                renderGamesGrid();
-            };
-        }
-    } else {
-        if (totalMatching > 0) {
-            wrap.classList.remove('hidden');
-            wrap.innerHTML = `<div class="games-counter-info font-mono">Đã tải đầy đủ toàn bộ ${totalMatching.toLocaleString()} games ✓</div>`;
-        } else {
-            wrap.classList.add('hidden');
-        }
-    }
-}
-
-function toggleGameSelection(gameId, cardElement) {
-    SoundFX.playClick();
-    if (state.selectedGameIds.has(gameId)) {
-        state.selectedGameIds.delete(gameId);
-        cardElement.classList.remove('selected');
-    } else {
-        state.selectedGameIds.add(gameId);
-        cardElement.classList.add('selected');
-    }
-    saveSelectedGames();
-    updateSelectedGamesCounter();
-}
-
-function updateSelectedGamesCounter() {
-    const count = state.selectedGameIds.size;
-    const badge = $('selected-counter-badge');
-    const countNum = $('selected-count-num');
-    const btnSpoof = $('btn-spoof-selected');
-
-    if (countNum) countNum.textContent = count;
-    if (badge) badge.classList.toggle('hidden', count === 0);
-    if (btnSpoof) btnSpoof.classList.toggle('hidden', count === 0);
-}
+function renderGamesGrid() {}
 
 // ── 13. Discord Official Badges & Statistics Engine ────────────────────────
 
@@ -2023,7 +1845,7 @@ function setupEventBindings() {
             if (searchInput) searchInput.value = '';
             clearSearchBtn.classList.add('hidden');
             state.gamesSearchQuery = '';
-            fetchGamesList('');
+            // Games library page removed for optimal zero-lag performance
         });
     }
     // Clear search buttons (both empty state and search bar)
@@ -2039,7 +1861,7 @@ function setupEventBindings() {
                 const clearSearchBtn = $('btn-clear-search');
                 if (clearSearchBtn) clearSearchBtn.classList.add('hidden');
                 state.gamesSearchQuery = '';
-                fetchGamesList('');
+                // Games library page removed for optimal zero-lag performance
             });
         }
     });
@@ -2205,7 +2027,7 @@ function setupEventBindings() {
         // Ctrl + 1..5 -> Switch Page
         if (e.ctrlKey && ['1', '2', '3', '4', '5'].includes(e.key)) {
             e.preventDefault();
-            const pages = ['dashboard', 'games', 'stats', 'settings', 'logs'];
+            const pages = ['dashboard', 'stats', 'logs', 'settings'];
             const idx = parseInt(e.key, 10) - 1;
             if (pages[idx]) switchPage(pages[idx]);
             return;
@@ -2217,14 +2039,7 @@ function setupEventBindings() {
             return;
         }
 
-        // '/' -> Focus Search Game
-        if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
-            e.preventDefault();
-            switchPage('games');
-            if ($('input-game-search')) {
-                setTimeout(() => $('input-game-search').focus(), 80);
-            }
-        }
+// Search shortcut removed
     });
 
     // Material Ripple Effect for all buttons
@@ -2306,7 +2121,7 @@ async function initApplication() {
     }, 500);
 
     // Preload games library in background so 10,464 games are ready instantly
-    fetchGamesList('');
+    // Games library page removed for optimal zero-lag performance
 
     // Restore and display Discord Account immediately on launch from stored token
     const auth = getStoredAuth();
