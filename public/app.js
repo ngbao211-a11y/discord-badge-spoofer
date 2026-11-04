@@ -676,7 +676,15 @@ function updateDiscordUserUI(user) {
 
     const displayName = user.global_name || user.username || (user.id ? `User ${user.id.slice(-4)}` : 'Discord User');
     if (nameEl) nameEl.textContent = displayName;
-    if (idEl) idEl.textContent = user.id ? `ID: ${user.id}` : '';
+    if (idEl) {
+        if (user.id) {
+            idEl.textContent = `ID: ${user.id}`;
+        } else if (user.username) {
+            idEl.textContent = `@${user.username}`;
+        } else {
+            idEl.textContent = '';
+        }
+    }
     if (avatarEl && user.avatar_url) avatarEl.src = user.avatar_url;
 }
 
@@ -1838,16 +1846,9 @@ function setupEventBindings() {
     }
 
     // Discord Profile Sync Button in Topbar
-    if ($('btn-sync-discord')) {
-        $('btn-sync-discord').addEventListener('click', (e) => {
-            e.stopPropagation();
-            syncAuthWithServer(true);
-        });
-    }
     if ($('topbar-discord-pill')) {
-        $('topbar-discord-pill').addEventListener('click', (e) => {
-            if (e.target.closest('#btn-sync-discord')) return;
-            syncAuthWithServer(true);
+        $('topbar-discord-pill').addEventListener('click', () => {
+            openModal('modal-token');
         });
     }
 
@@ -2307,9 +2308,18 @@ async function initApplication() {
     // Preload games library in background so 10,464 games are ready instantly
     fetchGamesList('');
 
-    // Sync Discord Account immediately on launch if token is already stored
+    // Restore and display Discord Account immediately on launch from stored token
     const auth = getStoredAuth();
     if (auth.token) {
+        const tokenRes = validateDiscordToken(auth.token);
+        if (tokenRes.valid && tokenRes.userId) {
+            updateDiscordUserUI({
+                id: tokenRes.userId,
+                username: `User_${tokenRes.userId.slice(-4)}`,
+                global_name: `Discord User (${tokenRes.userId.slice(-4)})`,
+                avatar_url: `https://cdn.discordapp.com/embed/avatars/${Number(BigInt(tokenRes.userId) >> 22n) % 6}.png`
+            });
+        }
         syncAuthWithServer(false);
     } else {
         setTimeout(() => {

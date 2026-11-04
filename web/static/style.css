@@ -3241,14 +3241,14 @@ kbd {
 .topbar-user-pill {
     display: flex;
     align-items: center;
-    gap: 9px;
-    background: rgba(30, 31, 35, 0.75);
-    border: 1px solid rgba(88, 101, 242, 0.25);
-    padding: 5px 10px 5px 6px;
+    gap: 10px;
+    background: rgba(30, 31, 35, 0.85);
+    border: 1px solid rgba(88, 101, 242, 0.35);
+    padding: 5px 14px 5px 6px;
     border-radius: 20px;
     backdrop-filter: blur(8px);
     transition: all 0.25s ease;
-    cursor: default;
+    cursor: pointer;
 }
 
 .topbar-user-pill:hover {
