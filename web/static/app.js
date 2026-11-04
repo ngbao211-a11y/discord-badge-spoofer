@@ -484,7 +484,7 @@ function updateConnectionBadge(isConnected) {
         }
     }
     if (termStatus) {
-        termStatus.textContent = isConnected ? (isVercel ? '●'• Vercel Serverless Online' : '● SSE Connected') : '○ Reconnecting...';
+        termStatus.textContent = isConnected ? (isVercel ? '• Vercel Serverless Online' : '● SSE Connected') : '⚠ Reconnecting...';
         termStatus.style.color = isConnected ? 'var(--accent-green)' : 'var(--accent-red)';
     }
 
@@ -2141,6 +2141,7 @@ if (document.readyState === 'loading') {
 } else {
     initApplication();
 }
+
 
 
 
