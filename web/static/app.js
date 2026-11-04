@@ -406,6 +406,20 @@ async function fetchApi(endpoint, method = 'GET', body = null) {
 let sseInstance = null;
 let sseRetryDelay = 1000;
 const MAX_RETRY_DELAY = 15000;
+let heartbeatTimer = null;
+
+function startHeartbeat() {
+    if (heartbeatTimer) return;
+    heartbeatTimer = setInterval(async () => {
+        const res = await fetchApi('status');
+        if (res.ok) {
+            updateConnectionBadge(true);
+            if (res.data) updateStatus(res.data);
+        } else {
+            updateConnectionBadge(false);
+        }
+    }, 8000);
+}
 
 function connectSSE() {
     if (sseInstance) {
@@ -413,46 +427,62 @@ function connectSSE() {
     }
 
     const sseUrl = `/api/events?clientId=${encodeURIComponent(CLIENT_ID)}`;
-    sseInstance = new EventSource(sseUrl);
+    try {
+        sseInstance = new EventSource(sseUrl);
 
-    sseInstance.onopen = () => {
-        sseRetryDelay = 1000;
-        updateConnectionBadge(true);
-    };
+        sseInstance.onopen = () => {
+            sseRetryDelay = 1000;
+            updateConnectionBadge(true);
+        };
 
-    sseInstance.onmessage = event => {
-        if (!event.data || event.data.trim() === ': ping') return;
-        try {
-            const payload = JSON.parse(event.data);
-            handleIncomingEvent(payload);
-        } catch (e) {
-            console.error('SSE JSON error:', e);
-        }
-    };
+        sseInstance.onmessage = event => {
+            if (!event.data || event.data.trim() === ': ping') return;
+            try {
+                const payload = JSON.parse(event.data);
+                handleIncomingEvent(payload);
+            } catch (e) {
+                console.error('SSE JSON error:', e);
+            }
+        };
 
-    sseInstance.onerror = () => {
-        updateConnectionBadge(false);
-        sseInstance.close();
-        setTimeout(() => {
-            sseRetryDelay = Math.min(sseRetryDelay * 1.5, MAX_RETRY_DELAY);
-            connectSSE();
-        }, sseRetryDelay);
-    };
+        sseInstance.onerror = () => {
+            sseInstance.close();
+            // On Vercel, EventSource streams close on serverless return. Check status API.
+            fetchApi('status').then(res => {
+                if (res.ok) {
+                    updateConnectionBadge(true);
+                    if (res.data) updateStatus(res.data);
+                    startHeartbeat();
+                } else {
+                    updateConnectionBadge(false);
+                }
+            }).catch(() => {
+                updateConnectionBadge(false);
+            });
+        };
+    } catch (e) {
+        startHeartbeat();
+    }
 }
 
 function updateConnectionBadge(isConnected) {
     const badge = $('topbar-conn-badge');
     const label = $('topbar-conn-label');
     const termStatus = $('term-live-status');
+    const isVercel = window.location.hostname.includes('vercel.app') || (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1');
 
     if (badge) {
         badge.classList.toggle('error', !isConnected);
     }
     if (label) {
-        label.textContent = isConnected ? 'Online (Cục bộ)' : 'Mất kết nối';
+        if (isConnected) {
+            label.textContent = isVercel ? 'Online (Vercel Cloud)' : 'Online (Cục bộ)';
+        } else {
+            label.textContent = 'Mất kết nối';
+        }
     }
     if (termStatus) {
-        termStatus.textContent = isConnected ? '● SSE Connected' : '○ SSE Reconnecting...';
+        termStatus.textContent = isConnected ? (isVercel ? '● Vercel Serverless Online' : '● SSE Connected') : '○ Reconnecting...';
         termStatus.style.color = isConnected ? 'var(--accent-green)' : 'var(--accent-red)';
     }
 }
@@ -605,11 +635,16 @@ async function syncAuthWithServer(showFeedback = false) {
 
 function updateDiscordUserUI(user) {
     if (!user) return;
+    try {
+        localStorage.setItem('discord_cached_user', JSON.stringify(user));
+    } catch (e) {}
+
     const nameEl = $('topbar-user-name');
     const idEl = $('topbar-user-uid');
     const avatarEl = $('topbar-discord-avatar');
 
-    if (nameEl) nameEl.textContent = user.global_name || user.username || `User ${user.id || ''}`;
+    const displayName = user.global_name || user.username || (user.id ? `User ${user.id.slice(-4)}` : 'Discord User');
+    if (nameEl) nameEl.textContent = displayName;
     if (idEl) idEl.textContent = user.id ? `ID: ${user.id}` : '';
     if (avatarEl && user.avatar_url) avatarEl.src = user.avatar_url;
 }
@@ -1495,31 +1530,23 @@ function setupEventBindings() {
         if (parts.length !== 3) {
             return { 
                 valid: false, 
-                message: 'Định dạng Token không đúng! Token Discord hợp lệ bắt buộc gồm 3 phần ngăn cách bởi 2 dấu chấm (VD: MT...x.G...y.Z...z).' 
+                message: 'Định dạng Token không đúng! Token Discord hợp lệ gồm 3 phần (VD: MT...x.G...y.Z...z).' 
             };
         }
+        let decodedUid = '';
         try {
-            const pad = '='.repeat((4 - (parts[0].length % 4)) % 4);
-            const decodedUid = atob(parts[0] + pad);
-            if (!/^\d{17,20}$/.test(decodedUid)) {
-                return { 
-                    valid: false, 
-                    message: 'Phần đầu Token không hợp lệ (không chứa Discord User ID hợp lệ).' 
-                };
-            }
-        } catch (e) {
-            return { 
-                valid: false, 
-                message: 'Phần đầu Token bị lỗi mã hoá Base64!' 
-            };
-        }
+            const b64 = parts[0].replace(/-/g, '+').replace(/_/g, '/');
+            const pad = '='.repeat((4 - (b64.length % 4)) % 4);
+            decodedUid = atob(b64 + pad);
+        } catch (e) {}
+
         if (token.length < 50 || token.length > 110) {
             return { 
                 valid: false, 
                 message: `Độ dài Token bất thường (${token.length} ký tự). Token Discord thật thường từ 68-76 ký tự.` 
             };
         }
-        return { valid: true, cleanToken: token };
+        return { valid: true, cleanToken: token, userId: decodedUid };
     }
 
     function validateCfClearance(cookieStr) {
@@ -1583,6 +1610,15 @@ function setupEventBindings() {
             if (errEl) errEl.classList.add('hidden');
             if (inputEl) inputEl.classList.remove('is-invalid');
             localStorage.setItem(STORAGE_KEYS.TOKEN, res.cleanToken);
+            if (res.userId && /^\d{16,21}$/.test(res.userId)) {
+                const tempUser = {
+                    id: res.userId,
+                    username: `User_${res.userId.slice(-4)}`,
+                    global_name: `Discord User (${res.userId.slice(-4)})`,
+                    avatar_url: `https://cdn.discordapp.com/embed/avatars/${Number(BigInt(res.userId) >> 22n) % 6}.png`
+                };
+                updateDiscordUserUI(tempUser);
+            }
             updateAuthPills();
             closeAllModals();
             showToast('✅ Đã xác thực & lưu Discord Token thành công!', 'success');
@@ -2070,6 +2106,14 @@ async function initApplication() {
     if (res.ok && res.data) {
         updateStatus(res.data);
     }
+
+    // Restore cached Discord user profile from localStorage immediately
+    try {
+        const cachedUser = localStorage.getItem('discord_cached_user');
+        if (cachedUser) {
+            updateDiscordUserUI(JSON.parse(cachedUser));
+        }
+    } catch (e) {}
 
     // Connect SSE Stream
     connectSSE();
