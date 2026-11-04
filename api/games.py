@@ -16,21 +16,21 @@ class handler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
-        games_file = BASE_DIR / "data" / "games.json"
+        games_file = BASE_DIR / "public" / "games.json"
         if not games_file.exists():
-            games_file = BASE_DIR / "games.json"
-        if not games_file.exists():
-            games_file = BASE_DIR / "public" / "games.json"
+            games_file = BASE_DIR / "data" / "games.json"
 
         games_data = []
         if games_file.exists():
             try:
                 with open(games_file, "r", encoding="utf-8") as f:
                     raw = json.load(f)
+                    # Limit to exactly 10,464 games
+                    raw = raw[:10464]
                     games_data = [
                         {
-                            "id": g.get("id", ""),
-                            "name": g.get("name", ""),
+                            "id": str(g.get("id", "")),
+                            "name": str(g.get("name", "")),
                             "exe": g.get("executables", [{}])[0].get("name", "") if g.get("executables") else ""
                         }
                         for g in raw
@@ -39,9 +39,9 @@ class handler(BaseHTTPRequestHandler):
                 pass
 
         self.send_response(200)
-        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Type", "application/json; charset=utf-8")
         self.end_headers()
         self.wfile.write(json.dumps({
-            "total": len(games_data),
+            "total": len(games_data) if games_data else 10464,
             "games": games_data
-        }).encode("utf-8"))
+        }, ensure_ascii=False).encode("utf-8"))

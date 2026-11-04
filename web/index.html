@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="purple">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discord Badge Spoofer | Skidder by Yusei</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Ambient Aurora Glow & Background Mesh -->
+    <div class="aurora-mesh"></div>
+    <div class="ambient-glow blob-purple"></div>
+    <div class="ambient-glow blob-blue"></div>
+    <div class="ambient-glow blob-cyan"></div>
+    <div class="noise-grid"></div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+    <!-- ==================== MODALS ==================== -->
+
+    <!-- Modal 1: Discord Token -->
+    <div class="modal-overlay" id="modal-token" role="dialog" aria-modal="true" aria-labelledby="modal-token-title">
+        <div class="modal-card modal-sm">
+            <div class="modal-header">
+                <div class="modal-title-wrap">
+                    <div class="modal-icon-badge badge-purple">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 2l-2 2m-1.5 1.5L14 9l-3-3 2.5-2.5a2.121 2.121 0 0 1 3 3L9 14l-4 4-2 2 2-2 4-4 7.5-7.5a2.121 2.121 0 0 1 3 3z"/></svg>
+                    </div>
+                    <div>
+                        <h3 id="modal-token-title" class="modal-title">Discord User Token</h3>
+                        <p class="modal-sub">Mã ủy quyền tài khoản Discord của bạn</p>
+                    </div>
+                </div>
+                <button class="modal-close-btn" data-close-modal title="Đóng (Esc)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="input-token" class="form-label">
+                        <span>Authorization Token</span>
+                        <a href="javascript:void(0)" class="label-link" id="link-how-token">Cách lấy?</a>
+                    </label>
+                    <div class="input-action-wrapper">
+                        <input type="password" id="input-token" class="styled-input" placeholder="Dán token Discord (bắt đầu bằng M, N, O...)" autocomplete="off" spellcheck="false">
+                        <button type="button" class="btn-toggle-eye" data-target="input-token" title="Hiện/ẩn token">
+                            <svg class="eye-open" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            <svg class="eye-closed hidden" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                        </button>
+                    </div>
+                    <div id="token-validation-msg" class="input-validation-msg hidden"></div>
+                    <p class="form-hint">Token được lưu an toàn trong trình duyệt cục bộ (localStorage) và chỉ gửi trực tiếp tới Discord Science API.</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-close-modal>Huỷ</button>
+                <button type="button" class="btn btn-primary" id="btn-save-token">
+                    <span>Lưu Token</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 2: cf_clearance Cookie -->
+    <div class="modal-overlay" id="modal-cookie" role="dialog" aria-modal="true" aria-labelledby="modal-cookie-title">
+        <div class="modal-card modal-sm">
+            <div class="modal-header">
+                <div class="modal-title-wrap">
+                    <div class="modal-icon-badge badge-amber">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><circle cx="8" cy="9" r="1.5" fill="currentColor"/><circle cx="15" cy="8" r="1" fill="currentColor"/><circle cx="10" cy="14" r="1.5" fill="currentColor"/><circle cx="16" cy="14" r="1" fill="currentColor"/></svg>
+                    </div>
+                    <div>
+                        <h3 id="modal-cookie-title" class="modal-title">Cloudflare Cookie</h3>
+                        <p class="modal-sub">Cookie <code>cf_clearance</code> từ discord.com</p>
+                    </div>
+                </div>
+                <button class="modal-close-btn" data-close-modal title="Đóng (Esc)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="input-cookie" class="form-label">
+                        <span>cf_clearance Value</span>
+                        <a href="javascript:void(0)" class="label-link" id="link-how-cookie">Cách lấy?</a>
+                    </label>
+                    <div class="input-action-wrapper">
+                        <input type="password" id="input-cookie" class="styled-input" placeholder="Dán giá trị cookie cf_clearance..." autocomplete="off" spellcheck="false">
+                        <button type="button" class="btn-toggle-eye" data-target="input-cookie" title="Hiện/ẩn cookie">
+                            <svg class="eye-open" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            <svg class="eye-closed hidden" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                        </button>
+                    </div>
+                    <div id="cookie-validation-msg" class="input-validation-msg hidden"></div>
+                    <p class="form-hint">Cloudflare dùng cookie này để xác thực request vượt qua bot protection của Discord.</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-close-modal>Huỷ</button>
+                <button type="button" class="btn btn-primary" id="btn-save-cookie">
+                    <span>Lưu Cookie</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 3: Fingerprint -->
+    <div class="modal-overlay" id="modal-fingerprint" role="dialog" aria-modal="true" aria-labelledby="modal-fp-title">
+        <div class="modal-card modal-sm">
+            <div class="modal-header">
+                <div class="modal-title-wrap">
+                    <div class="modal-icon-badge badge-blue">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.07.99-4.275.99-6.551A8 8 0 004 11.57"/></svg>
+                    </div>
+                    <div>
+                        <h3 id="modal-fp-title" class="modal-title">Executable Fingerprint</h3>
+                        <p class="modal-sub">Dấu vân tay phần cứng client (Tuỳ chọn)</p>
+                    </div>
+                </div>
+                <button class="modal-close-btn" data-close-modal title="Đóng (Esc)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="input-fingerprint" class="form-label">Fingerprint (Base64 string)</label>
+                    <input type="text" id="input-fingerprint" class="styled-input font-mono" placeholder="Để trống để bot tự sinh tự động..." autocomplete="off">
+                    <div class="tip-box">
+                        <span class="tip-icon">💡</span>
+                        <span>Nếu bạn để trống, hệ thống sẽ tự động giả lập một chuỗi Fingerprint ngẫu nhiên chuẩn Discord Desktop Client.</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-close-modal>Huỷ</button>
+                <button type="button" class="btn btn-primary" id="btn-save-fp">
+                    <span>Lưu Fingerprint</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 4: Comprehensive Guide -->
+    <div class="modal-overlay" id="guide-modal" role="dialog" aria-modal="true" aria-labelledby="modal-guide-title">
+        <div class="modal-card modal-lg">
+            <div class="modal-header">
+                <div class="modal-title-wrap">
+                    <div class="modal-icon-badge badge-purple">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                    </div>
+                    <div>
+                        <h3 id="modal-guide-title" class="modal-title">Hướng Dẫn Lấy Token & Cookie Discord</h3>
+                        <p class="modal-sub">Chỉ mất 1 phút thực hiện trực tiếp trên trình duyệt</p>
+                    </div>
+                </div>
+                <button class="modal-close-btn" data-close-modal title="Đóng (Esc)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="modal-body custom-scroll">
+                <div class="guide-steps-grid">
+                    <!-- Step 1 -->
+                    <div class="guide-card">
+                        <div class="guide-num">01</div>
+                        <div class="guide-content">
+                            <h4>Lấy Discord Token (Bắt buộc)</h4>
+                            <p>Token này giúp Spoofer gửi gói tin Science giả lập tiến trình game.</p>
+                            <ol class="guide-list">
+                                <li>Mở <strong>Google Chrome</strong> hoặc <strong>MS Edge</strong>, truy cập <a href="https://discord.com/app" target="_blank" rel="noreferrer" class="link-external">discord.com/app</a> và đăng nhập tài khoản của bạn.</li>
+                                <li>Nhấn phím <code>F12</code> (hoặc <code>Ctrl+Shift+I</code>) để mở <strong>DevTools</strong>.</li>
+                                <li>Chuyển sang tab <strong>Network</strong> (Mạng).</li>
+                                <li>Vào một kênh chat bất kỳ và gửi một tin nhắn ngắn (hoặc chuyển kênh).</li>
+                                <li>Ở thanh tìm kiếm filter, gõ <code>messages</code> hoặc <code>science</code>.</li>
+                                <li>Bấm vào request đó, xem tab <strong>Headers</strong> &rarr; kéo xuống phần <strong>Request Headers</strong>.</li>
+                                <li>Tìm trường <code>authorization</code> &rarr; copy toàn bộ chuỗi ký tự (thường bắt đầu bằng <code>M...</code>, <code>N...</code> hoặc <code>O...</code>).</li>
+                            </ol>
+                            <div class="guide-code-box">
+                                <span class="code-label">Header:</span>
+                                <code>authorization: MTIxODU...XXXX.YYYY</code>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div class="guide-card">
+                        <div class="guide-num">02</div>
+                        <div class="guide-content">
+                            <h4>Lấy Cookie cf_clearance (Bắt buộc)</h4>
+                            <p>Cookie này giúp vượt lớp lọc Cloudflare Bot Protection.</p>
+                            <ol class="guide-list">
+                                <li>Vẫn trong cửa sổ <strong>DevTools (F12)</strong> tại trang <code>discord.com</code>.</li>
+                                <li>Chuyển sang tab <strong>Application</strong> (hoặc <strong>Bộ nhớ / Lưu trữ</strong>).</li>
+                                <li>Ở menu cây bên trái, mở mục <strong>Cookies</strong> &rarr; chọn <code>https://discord.com</code>.</li>
+                                <li>Tìm hàng có tên là <code>cf_clearance</code>.</li>
+                                <li>Nhấp đúp vào cột <strong>Value</strong> và copy toàn bộ giá trị chuỗi đó.</li>
+                            </ol>
+                            <div class="guide-code-box">
+                                <span class="code-label">Cookie:</span>
+                                <code>cf_clearance: a1b2c3d4e5f6...</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Security Note -->
+                <div class="security-banner">
+                    <div class="sec-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    </div>
+                    <div class="sec-text">
+                        <h5>Bảo Mật Tuyệt Đối Cục Bộ (Local Privacy)</h5>
+                        <p>Ứng dụng chạy 100% trên máy tính cá nhân của bạn (Cục bộ Localhost). Tuyệt đối không gửi token hoặc cookie của bạn đến bất kỳ bên thứ ba hay máy chủ trung gian nào ngoài máy chủ chính thức của Discord.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-close-modal>Đã hiểu, sẵn sàng!</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 5: Wipe Data Confirm -->
+    <div class="modal-overlay" id="modal-confirm-wipe" role="dialog" aria-modal="true">
+        <div class="modal-card modal-sm modal-danger">
+            <div class="modal-header">
+                <div class="modal-title-wrap">
+                    <div class="modal-icon-badge badge-red">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    </div>
+                    <div>
+                        <h3 class="modal-title">Xoá toàn bộ dữ liệu?</h3>
+                        <p class="modal-sub">Hành động này không thể hoàn tác</p>
+                    </div>
+                </div>
+                <button class="modal-close-btn" data-close-modal title="Đóng (Esc)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Toàn bộ thông tin đăng nhập đã lưu (Token, Cookie, Fingerprint), lịch sử các phiên chạy, game yêu thích và cài đặt giao diện sẽ bị xoá khỏi bộ nhớ trình duyệt.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-close-modal>Huỷ bỏ</button>
+                <button type="button" class="btn btn-danger" id="btn-do-wipe">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    <span>Xoá hết & Reset</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 6: Customize Badges & Discord Stats -->
+    <div class="modal-overlay" id="modal-customize-badges" role="dialog" aria-modal="true" aria-labelledby="modal-custom-title">
+        <div class="modal-card modal-sm customize-modal-card">
+            <div class="modal-header">
+                <div class="modal-title-wrap">
+                    <div class="modal-icon-badge badge-purple">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    </div>
+                    <div>
+                        <h3 id="modal-custom-title" class="modal-title">Tùy Chỉnh Huy Hiệu Discord</h3>
+                        <p class="modal-sub">Hiệu chỉnh mốc giờ & game đồng bộ tài khoản</p>
+                    </div>
+                </div>
+                <button class="modal-close-btn" data-close-modal title="Đóng (Esc)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-desc" style="font-size: 13px; color: #949ba4; margin-bottom: 14px;">
+                    Hiệu chỉnh chỉ số tích lũy để mở khóa huy hiệu anime thần thoại hoặc đồng bộ số liệu hiển thị theo ý muốn:
+                </p>
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label class="form-label" for="input-custom-hours">Tổng giờ chơi muốn gán (Giờ / Hours)</label>
+                    <input type="number" id="input-custom-hours" class="form-input font-mono" placeholder="VD: 5000 hoặc 169582" min="0" step="0.5">
+                </div>
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label class="form-label" for="input-custom-games">Tổng số trò chơi muốn gán (Games)</label>
+                    <input type="number" id="input-custom-games" class="form-input font-mono" placeholder="VD: 100 hoặc 8950" min="0" step="1">
+                </div>
+                <div class="preset-milestones-row">
+                    <div style="font-size: 11px; font-weight: 700; color: #949ba4; margin-bottom: 6px; text-transform: uppercase;">Mốc đề xuất nhanh:</div>
+                    <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                        <button type="button" class="btn-preset-chip" data-h="169582" data-g="8950">✨ Thần Thoại Anime (169.582h)</button>
+                        <button type="button" class="btn-preset-chip" data-h="5000" data-g="100">🏆 Cấp 10 Tối Đa (5.000h / 100 Games)</button>
+                        <button type="button" class="btn-preset-chip" data-h="2000" data-g="80">🔥 Cấp 9 Kiên Định (2.000h)</button>
+                        <button type="button" class="btn-preset-chip" data-h="500" data-g="40">⚡ Cấp 7 Lão Luyện (500h)</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-close-modal>Đóng</button>
+                <button type="button" class="btn btn-primary" id="btn-apply-custom-stats">
+                    <span>Lưu & Đồng Bộ Ngay ✓</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MAIN APP SHELL ==================== -->
+    <div class="app-layout">
+
+        <!-- 1. LEFT ICON RAIL (68px) -->
+        <nav class="nav-rail" aria-label="Điều hướng chính">
+            <!-- Brand Logo -->
+            <div class="rail-logo" title="Discord Badge Spoofer | Skidder by Yusei">
+                <div class="logo-mark">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                        <path d="M2 17l10 5 10-5"/>
+                        <path d="M2 12l10 5 10-5"/>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Nav Items Stack -->
+            <div class="rail-items">
+                <!-- 1. Dashboard -->
+                <button class="rail-btn active" data-page="dashboard" title="Bảng điều khiển (Ctrl+1)">
+                    <div class="rail-btn-icon">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    </div>
+                    <span class="rail-tooltip">Dashboard <kbd>Ctrl+1</kbd></span>
+                </button>
+
+                <!-- 2. Game Library -->
+                <button class="rail-btn" data-page="games" title="Kho game Discord (Ctrl+2)">
+                    <div class="rail-btn-icon">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="6 2 18 2 18 6 6 6 6 2"/><rect x="3" y="6" width="18" height="16" rx="2"/><circle cx="8" cy="14" r="1.5" fill="currentColor"/><circle cx="16" cy="14" r="1.5" fill="currentColor"/><path d="M12 12v4M10 14h4"/></svg>
+                    </div>
+                    <span class="rail-tooltip">Kho Game <kbd>Ctrl+2</kbd></span>
+                </button>
+
+                <!-- 3. Statistics -->
+                <button class="rail-btn" data-page="stats" title="Thống kê & Danh hiệu (Ctrl+3)">
+                    <div class="rail-btn-icon">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                    </div>
+                    <span class="rail-tooltip">Thống kê <kbd>Ctrl+3</kbd></span>
+                </button>
+
+                <!-- 4. Settings -->
+                <button class="rail-btn" data-page="settings" title="Cài đặt & Giao diện (Ctrl+4)">
+                    <div class="rail-btn-icon">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                    </div>
+                    <span class="rail-tooltip">Cài đặt <kbd>Ctrl+4</kbd></span>
+                </button>
+
+                <!-- 5. Logs / Terminal -->
+                <button class="rail-btn" data-page="logs" title="Nhật ký & Terminal (Ctrl+5)">
+                    <div class="rail-btn-icon">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+                    </div>
+                    <span class="rail-tooltip">Nhật ký <kbd>Ctrl+5</kbd></span>
+                    <span class="rail-counter-badge" id="rail-log-badge">0</span>
+                </button>
+            </div>
+
+            <!-- Bottom Rail Actions -->
+            <div class="rail-bottom">
+                <button class="rail-btn-aux" id="btn-quick-guide" title="Xem hướng dẫn (F1)">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                    <span class="rail-tooltip">Hướng dẫn</span>
+                </button>
+            </div>
+        </nav>
+
+        <!-- 2. SIDEBAR CONTEXT PANEL (280px) -->
+        <aside class="sidebar-panel">
+            <!-- Sidebar Brand Header -->
+            <div class="side-brand-box">
+                <div class="side-brand-title">DISCORD SPOOFER</div>
+                <div class="side-brand-author">Skidder by Yusei</div>
+            </div>
+
+            <!-- Sidebar Header / Status -->
+            <div class="side-header">
+                <div class="bot-status-card" id="side-status-card">
+                    <div class="status-indicator-wrap">
+                        <div class="status-dot-pulse" id="status-dot">
+                            <span class="ring-pulse r1"></span>
+                            <span class="ring-pulse r2"></span>
+                            <span class="ring-pulse r3"></span>
+                            <span class="core-dot"></span>
+                        </div>
+                    </div>
+                    <div class="status-meta">
+                        <span class="status-label-sub">TRẠNG THÁI BOT</span>
+                        <h4 class="status-text-main" id="status-text">Đang kết nối...</h4>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Auth Quick Setup Pills -->
+            <div class="side-section">
+                <div class="side-section-header">
+                    <span class="side-section-title">XÁC THỰC DISCORD</span>
+                    <button class="btn-text-action" id="btn-side-guide">Hướng dẫn</button>
+                </div>
+                
+                <div class="auth-pills-list">
+                    <!-- Token Pill -->
+                    <button class="auth-pill-item" id="btn-config-token">
+                        <div class="auth-pill-status" id="indicator-token"></div>
+                        <div class="auth-pill-content">
+                            <span class="auth-pill-title">User Token</span>
+                            <span class="auth-pill-val" id="pill-label-token">Chưa cấu hình</span>
+                        </div>
+                        <span class="auth-pill-arrow">›</span>
+                    </button>
+
+                    <!-- Cookie Pill -->
+                    <button class="auth-pill-item" id="btn-config-cookie">
+                        <div class="auth-pill-status" id="indicator-cookie"></div>
+                        <div class="auth-pill-content">
+                            <span class="auth-pill-title">cf_clearance</span>
+                            <span class="auth-pill-val" id="pill-label-cookie">Chưa cấu hình</span>
+                        </div>
+                        <span class="auth-pill-arrow">›</span>
+                    </button>
+
+                    <!-- Fingerprint Pill -->
+                    <button class="auth-pill-item" id="btn-config-fp">
+                        <div class="auth-pill-status active" id="indicator-fp"></div>
+                        <div class="auth-pill-content">
+                            <span class="auth-pill-title">Fingerprint</span>
+                            <span class="auth-pill-val" id="pill-label-fp">Tự động (Auto)</span>
+                        </div>
+                        <span class="auth-pill-arrow">›</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Account Details Mini Card -->
+            <div class="side-section">
+                <div class="account-spec-box">
+                    <div class="spec-row">
+                        <span class="spec-name">User ID</span>
+                        <span class="spec-val font-mono" id="user-id">—</span>
+                    </div>
+                    <div class="spec-row">
+                        <span class="spec-name">Token</span>
+                        <span class="spec-val font-mono" id="token-masked">—</span>
+                    </div>
+                    <div class="spec-row">
+                        <span class="spec-name">Cookie</span>
+                        <span class="spec-val font-mono" id="cookie-masked">—</span>
+                    </div>
+                    <div class="spec-row">
+                        <span class="spec-name">Client ID</span>
+                        <span class="spec-val font-mono" id="client-id-label">local</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live Session Progress Widget -->
+            <div class="side-section">
+                <div class="live-progress-card" id="side-progress-card">
+                    <div class="progress-meta-row">
+                        <span class="prog-title">Tiến trình đợt chạy</span>
+                        <span class="prog-pct-badge" id="side-prog-pct">0%</span>
+                    </div>
+                    <div class="progress-track-wrapper">
+                        <div class="progress-bar-fill" id="side-progress-fill" style="width: 0%;">
+                            <div class="progress-shimmer"></div>
+                        </div>
+                    </div>
+                    <div class="progress-footer-row">
+                        <span class="prog-sub-games" id="side-prog-games">0 / 0 games</span>
+                        <span class="prog-sub-hours" id="side-prog-hours">0h đã cày</span>
+                    </div>
+                    <div class="progress-eta-row hidden" id="side-prog-eta-wrap">
+                        <span class="eta-icon">⏱️</span>
+                        <span class="eta-text" id="side-prog-eta">Còn lại: --:--</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar Contextual Actions / Footer -->
+            <div class="side-footer">
+                <div class="side-footer-actions">
+                    <button class="btn btn-outline-xs flex-1" id="btn-refresh-auth" title="Làm mới token Science từ Discord">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+                        <span>Refresh Auth</span>
+                    </button>
+                    <button class="btn btn-outline-xs" id="btn-clear-logs-quick" title="Xoá nhanh log console">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+                    </button>
+                </div>
+                <div class="server-badge">
+                    <span class="srv-dot"></span>
+                    <span class="srv-text">Local Engine</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 3. MAIN CONTENT AREA (flex: 1) -->
+        <main class="main-viewport custom-scroll">
+            
+            <!-- Global Top Bar -->
+            <header class="main-topbar">
+                <div class="topbar-left">
+                    <div class="page-breadcrumb">
+                        <span class="crumb-root">Discord Spoofer</span>
+                        <span class="crumb-sep">/</span>
+                        <span class="crumb-current" id="topbar-current-page">Dashboard</span>
+                        <span class="crumb-author-badge">Skidder by Yusei</span>
+                    </div>
+                    <div class="topbar-tagline" id="topbar-tagline">Tự động cày giờ chơi & số game Discord — an toàn, bảo mật</div>
+                </div>
+                
+                <div class="topbar-right">
+                    <!-- Discord User Profile & Sync Pill -->
+                    <div class="topbar-user-pill" id="topbar-discord-pill">
+                        <img id="topbar-discord-avatar" class="topbar-user-avatar" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%235865F2'><path d='M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.894.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z'/></svg>" alt="Discord User">
+                        <div class="topbar-user-meta">
+                            <span class="topbar-user-name" id="topbar-user-name">Tài Khoản Discord</span>
+                            <span class="topbar-user-id font-mono" id="topbar-user-uid">Chưa đồng bộ</span>
+                        </div>
+                        <button type="button" class="btn-sync-discord" id="btn-sync-discord" title="Đồng bộ ngay với tài khoản Discord">
+                            <svg class="spin-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                            <span>Đồng bộ</span>
+                        </button>
+                    </div>
+
+                    <!-- Audio Mute/Sound Toggle -->
+                    <button class="topbar-tool-btn" id="btn-toggle-sound" title="Bật/Tắt âm thanh hiệu ứng">
+                        <svg class="icon-sound-on" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+                        <svg class="icon-sound-off hidden" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+                    </button>
+
+                    <!-- Shortcut Help Button -->
+                    <button class="topbar-tool-btn" id="btn-open-guide-top">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                        <span>Hướng dẫn</span>
+                    </button>
+
+                    <!-- Connection Status Badge -->
+                    <div class="topbar-status-chip" id="topbar-conn-badge">
+                        <span class="conn-dot"></span>
+                        <span class="conn-label" id="topbar-conn-label">Đang kết nối</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- ================= PAGE 1: DASHBOARD ================= -->
+            <section class="page-view active" id="page-dashboard">
+                <div class="page-content-wrapper">
+
+                    <!-- 4 Animated Stat Cards -->
+                    <div class="stats-cards-row">
+                        <!-- Card 1: Games DB -->
+                        <div class="metric-card card-purple">
+                            <div class="metric-header">
+                                <span class="metric-label">KHO GAME SẴN CÓ</span>
+                                <div class="metric-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="8" cy="12" r="2"/><line x1="16" y1="10" x2="16" y2="10"/><line x1="18" y1="12" x2="18" y2="12"/><line x1="16" y1="14" x2="16" y2="14"/></svg>
+                                </div>
+                            </div>
+                            <div class="metric-body">
+                                <div class="metric-value font-mono" id="stat-games-counter">10,464</div>
+                                <div class="metric-meta">
+                                    <span class="badge-success-sub">100% Sync</span>
+                                    <span class="metric-note">trò chơi hỗ trợ</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card 2: Games Claimed -->
+                        <div class="metric-card card-blue">
+                            <div class="metric-header">
+                                <span class="metric-label">GAME ĐÃ CLAIM</span>
+                                <div class="metric-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                </div>
+                            </div>
+                            <div class="metric-body">
+                                <div class="metric-value font-mono" id="stat-claimed-counter">0</div>
+                                <div class="metric-meta">
+                                    <span class="badge-accent-sub" id="stat-claimed-sub">Tài khoản này</span>
+                                    <span class="metric-note">đã gửi Discord</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card 3: Hours Claimed -->
+                        <div class="metric-card card-cyan">
+                            <div class="metric-header">
+                                <span class="metric-label">GIỜ CHƠI TÍCH LUỸ</span>
+                                <div class="metric-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                </div>
+                            </div>
+                            <div class="metric-body">
+                                <div class="metric-value font-mono" id="stat-hours-counter">0.0h</div>
+                                <div class="metric-meta">
+                                    <span class="badge-cyan-sub" id="stat-hours-sub">Hoàn thành</span>
+                                    <span class="metric-note">giờ chơi profile</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card 4: Success Rate -->
+                        <div class="metric-card card-green">
+                            <div class="metric-header">
+                                <span class="metric-label">TỈ LỆ THÀNH CÔNG</span>
+                                <div class="metric-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                                </div>
+                            </div>
+                            <div class="metric-body">
+                                <div class="metric-value font-mono" id="stat-rate-counter">100%</div>
+                                <div class="metric-meta">
+                                    <span class="badge-green-sub" id="stat-rate-badge">Ổn định</span>
+                                    <span class="metric-note">gói tin Science</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Spoofer Engine Control Center Card -->
+                    <div class="engine-master-card glass-panel">
+                        <div class="engine-card-header">
+                            <div class="header-tag">
+                                <span class="pulse-spark"></span>
+                                <span>TRUNG TÂM ĐIỀU KHIỂN SPOOFING</span>
+                            </div>
+                            <div class="header-shortcuts-tip">
+                                <span>Phím tắt:</span>
+                                <kbd>Ctrl+Enter</kbd> Chạy / Dừng
+                            </div>
+                        </div>
+
+                        <!-- Mode Selector Slider -->
+                        <div class="mode-selector-wrapper">
+                            <label class="mode-selector-label">CHẾ ĐỘ HOẠT ĐỘNG</label>
+                            <div class="mode-slider-bar" id="mode-slider-bar">
+                                <div class="mode-slider-indicator" id="mode-slider-indicator"></div>
+                                <button type="button" class="mode-tab active" data-mode="both">
+                                    <span class="tab-badge badge-both">BOTH</span>
+                                    <span class="tab-text">Cả hai (Giờ + Số game)</span>
+                                </button>
+                                <button type="button" class="mode-tab" data-mode="playtime">
+                                    <span class="tab-badge badge-time">TIME</span>
+                                    <span class="tab-text">Claim Playtime (Tăng giờ)</span>
+                                </button>
+                                <button type="button" class="mode-tab" data-mode="games_played">
+                                    <span class="tab-badge badge-games">COUNT</span>
+                                    <span class="tab-text">Games Played (Số game)</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Inputs Grid -->
+                        <div class="engine-inputs-grid">
+                            <!-- Input 1: Game Count -->
+                            <div class="form-group-custom">
+                                <div class="group-label-row">
+                                    <label for="input-count">Số lượng game cần cày</label>
+                                    <span class="group-hint">(để trống = toàn bộ kho game)</span>
+                                </div>
+                                <div class="input-stepper-wrap">
+                                    <input type="number" id="input-count" class="styled-input-lg font-mono" placeholder="Tất cả (All)" min="1" max="50000">
+                                </div>
+                                <div class="quick-chips-row">
+                                    <button type="button" class="chip-preset" data-val="all">Toàn bộ</button>
+                                    <button type="button" class="chip-preset" data-val="100">100</button>
+                                    <button type="button" class="chip-preset" data-val="500">500</button>
+                                    <button type="button" class="chip-preset" data-val="1000">1,000</button>
+                                    <button type="button" class="chip-preset" data-val="5000">5,000</button>
+                                </div>
+                            </div>
+
+                            <!-- Input 2: Hours per Game -->
+                            <div class="form-group-custom">
+                                <div class="group-label-row">
+                                    <label for="input-hours">Số giờ cày cho mỗi game</label>
+                                    <span class="group-hint">(khuyến nghị 10 - 24 giờ)</span>
+                                </div>
+                                <div class="input-stepper-wrap">
+                                    <input type="number" id="input-hours" class="styled-input-lg font-mono" value="10" step="0.5" min="0.1" max="1000">
+                                    <span class="input-unit">giờ</span>
+                                </div>
+                                <div class="quick-chips-row">
+                                    <button type="button" class="chip-preset-hour" data-val="2">2h</button>
+                                    <button type="button" class="chip-preset-hour" data-val="5">5h</button>
+                                    <button type="button" class="chip-preset-hour active" data-val="10">10h</button>
+                                    <button type="button" class="chip-preset-hour" data-val="24">24h</button>
+                                    <button type="button" class="chip-preset-hour" data-val="50">50h</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Estimate & Info Banner -->
+                        <div class="engine-estimate-bar">
+                            <div class="estimate-item">
+                                <span class="est-icon">🎮</span>
+                                <span class="est-label">Sẵn sàng:</span>
+                                <span class="est-val font-mono" id="est-games-count">10,464 games</span>
+                            </div>
+                            <div class="estimate-divider"></div>
+                            <div class="estimate-item">
+                                <span class="est-icon">⚡</span>
+                                <span class="est-label">Ước tính tổng:</span>
+                                <span class="est-val font-mono" id="est-total-hours">~104,640h playtime</span>
+                            </div>
+                            <div class="estimate-divider"></div>
+                            <div class="estimate-item">
+                                <span class="est-icon">📦</span>
+                                <span class="est-label">Quy mô:</span>
+                                <span class="est-val font-mono" id="est-batches-count">210 đợt batch</span>
+                            </div>
+                        </div>
+
+                        <!-- Big Central Action Hub (RUN & STOP) -->
+                        <div class="engine-action-hub">
+                            <!-- RUN BUTTON -->
+                            <button class="btn-mega-run" id="btn-start" type="button">
+                                <div class="btn-mega-glow"></div>
+                                <div class="btn-mega-border"></div>
+                                <div class="btn-mega-content">
+                                    <div class="btn-mega-icon">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                                    </div>
+                                    <div class="btn-mega-text">
+                                        <span class="btn-mega-title">BẮT ĐẦU SPOOFING</span>
+                                        <span class="btn-mega-sub">Gửi tiến trình game tới Discord Science API</span>
+                                    </div>
+                                </div>
+                                <div class="btn-spinner hidden" id="start-spinner"></div>
+                            </button>
+
+                            <!-- STOP BUTTON -->
+                            <button class="btn-mega-stop hidden" id="btn-stop" type="button">
+                                <div class="btn-mega-glow stop-glow"></div>
+                                <div class="btn-mega-border stop-border"></div>
+                                <div class="btn-mega-content">
+                                    <div class="btn-mega-icon">
+                                        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+                                    </div>
+                                    <div class="btn-mega-text">
+                                        <span class="btn-mega-title" id="btn-stop-text">DỪNG TIẾN TRÌNH</span>
+                                        <span class="btn-mega-sub">Hoàn tất batch hiện tại rồi ngắt an toàn</span>
+                                    </div>
+                                </div>
+                                <div class="btn-spinner hidden" id="stop-spinner"></div>
+                            </button>
+                        </div>
+
+                        <!-- Interactive Live Progress Bar -->
+                        <div class="engine-progress-bar-container" id="dash-progress-wrap">
+                            <div class="dash-prog-header">
+                                <div class="dash-prog-label-wrap">
+                                    <span class="dash-prog-pulse"></span>
+                                    <span class="dash-prog-title">Tiến trình chạy thời gian thực</span>
+                                </div>
+                                <div class="dash-prog-metrics">
+                                    <span class="dash-prog-games font-mono" id="dash-prog-games">0 / 0 games</span>
+                                    <span class="dash-prog-pct font-mono" id="dash-prog-pct">0%</span>
+                                </div>
+                            </div>
+                            <div class="dash-progress-track">
+                                <div class="dash-progress-fill" id="dash-progress-fill" style="width: 0%;">
+                                    <div class="dash-progress-shimmer"></div>
+                                </div>
+                            </div>
+                            <div class="dash-prog-footer">
+                                <span class="dash-prog-hours" id="dash-prog-hours">0.0h đã ghi nhận</span>
+                                <span class="dash-prog-eta" id="dash-prog-eta">Ước tính còn lại: --:--</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mini Live Console Preview Card -->
+                    <div class="dash-console-preview glass-panel">
+                        <div class="dash-console-header">
+                            <div class="dch-left">
+                                <div class="term-dots">
+                                    <span class="tdot td-red"></span>
+                                    <span class="tdot td-yellow"></span>
+                                    <span class="tdot td-green"></span>
+                                </div>
+                                <span class="dch-title">Nhật ký hoạt động gần đây</span>
+                            </div>
+                            <div class="dch-right">
+                                <button type="button" class="btn-link-action" id="btn-dash-view-all-logs">
+                                    <span>Mở toàn màn hình Terminal</span>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="dash-console-body custom-scroll font-mono" id="dash-mini-console">
+                            <!-- Mini logs stream injected here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================= PAGE 2: KHO GAME (GAME LIBRARY) ================= -->
+            <section class="page-view" id="page-games">
+                <div class="page-content-wrapper">
+                    
+                    <!-- Library Control Bar -->
+                    <div class="library-toolbar-card glass-panel">
+                        <div class="lib-toolbar-top">
+                            <div class="lib-search-box">
+                                <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                                <input type="text" id="input-game-search" class="search-input" placeholder="Tìm game theo tên, executable hoặc Game ID... (phím /)" autocomplete="off">
+                                <button type="button" class="search-clear-btn hidden" id="btn-clear-search" title="Xoá tìm kiếm">✕</button>
+                            </div>
+                            <div class="lib-stats-badge">
+                                <span class="lsb-num font-mono" id="lib-total-badge">10,464</span>
+                                <span class="lsb-text">Games Sẵn Sàng</span>
+                            </div>
+                        </div>
+
+                        <div class="lib-toolbar-bottom">
+                            <!-- Left: Selection controls -->
+                            <div class="lib-selection-actions">
+                                <button type="button" class="btn btn-outline-xs" id="btn-select-all-visible">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                                    <span>Chọn tất cả đang hiện</span>
+                                </button>
+                                <button type="button" class="btn btn-outline-xs" id="btn-deselect-all">
+                                    <span>Bỏ chọn</span>
+                                </button>
+                                <span class="selected-counter-badge hidden" id="selected-counter-badge">Đã chọn: <strong id="selected-count-num">0</strong> game</span>
+                            </div>
+
+                            <!-- Right: View switchers & Quick Action -->
+                            <div class="lib-view-actions">
+                                <button type="button" class="btn btn-primary-xs hidden" id="btn-spoof-selected">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                                    <span>Cày riêng game đã chọn</span>
+                                </button>
+                                
+                                <div class="view-mode-toggle">
+                                    <button type="button" class="view-btn active" id="btn-view-grid" title="Dạng lưới (Grid)">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                                    </button>
+                                    <button type="button" class="view-btn" id="btn-view-list" title="Dạng danh sách (List)">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Games List / Grid View Area -->
+                    <div class="games-display-container">
+                        <!-- Loading Skeleton -->
+                        <div class="games-skeleton-grid hidden" id="games-skeleton">
+                            <div class="skeleton-card"></div>
+                            <div class="skeleton-card"></div>
+                            <div class="skeleton-card"></div>
+                            <div class="skeleton-card"></div>
+                            <div class="skeleton-card"></div>
+                            <div class="skeleton-card"></div>
+                            <div class="skeleton-card"></div>
+                            <div class="skeleton-card"></div>
+                        </div>
+
+                        <!-- Rendered Games Target -->
+                        <div class="games-grid-view" id="games-grid-target">
+                            <!-- Injected by JavaScript -->
+                        </div>
+
+                        <!-- Empty state if no games match search -->
+                        <div class="games-empty-state hidden" id="games-empty-state">
+                            <div class="empty-icon">🔍</div>
+                            <h3>Không tìm thấy trò chơi phù hợp</h3>
+                            <p>Hãy thử tìm từ khoá khác hoặc xoá tìm kiếm để xem toàn bộ danh mục.</p>
+                            <button type="button" class="btn btn-outline-sm" id="btn-reset-search">Xem tất cả</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================= PAGE 3: THỐNG KÊ (STATISTICS & BADGES) ================= -->
+            <section class="page-view" id="page-stats">
+                <div class="page-content-wrapper">
+
+                    <!-- Stats Hero Row -->
+                    <div class="stats-overview-grid">
+                        <!-- Progress Ring Visual Widget -->
+                        <div class="glass-panel stats-ring-widget">
+                            <h4 class="widget-title">TIẾN TRÌNH PHIÊN HIỆN TẠI</h4>
+                            <div class="ring-container">
+                                <svg class="progress-svg-ring" width="160" height="160" viewBox="0 0 160 160">
+                                    <circle class="ring-bg" cx="80" cy="80" r="68" stroke-width="12"></circle>
+                                    <circle class="ring-val" id="svg-ring-val" cx="80" cy="80" r="68" stroke-width="12" stroke-dasharray="427" stroke-dashoffset="427"></circle>
+                                </svg>
+                                <div class="ring-content">
+                                    <span class="ring-pct font-mono" id="ring-pct-text">0%</span>
+                                    <span class="ring-sub" id="ring-sub-text">Chưa chạy</span>
+                                </div>
+                            </div>
+                            <div class="ring-footer-meta">
+                                <div class="rfm-col">
+                                    <span class="rfm-label">Đã gửi</span>
+                                    <span class="rfm-val font-mono" id="stats-current-sent">0 games</span>
+                                </div>
+                                <div class="rfm-col">
+                                    <span class="rfm-label">Playtime</span>
+                                    <span class="rfm-val font-mono" id="stats-current-hours">0h</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Mode Usage Distribution Bar Chart -->
+                        <div class="glass-panel stats-chart-widget">
+                            <h4 class="widget-title">TỈ LỆ PHÂN BỔ CHẾ ĐỘ SỬ DỤNG</h4>
+                            <div class="pure-bar-chart">
+                                <!-- Mode 1: Both -->
+                                <div class="bar-chart-row">
+                                    <div class="bcr-label">
+                                        <span>Both (Giờ + Game)</span>
+                                        <span class="font-mono" id="bar-val-both">65%</span>
+                                    </div>
+                                    <div class="bcr-track">
+                                        <div class="bcr-fill fill-purple" id="bar-fill-both" style="width: 65%;"></div>
+                                    </div>
+                                </div>
+                                <!-- Mode 2: Playtime -->
+                                <div class="bar-chart-row">
+                                    <div class="bcr-label">
+                                        <span>Playtime Only</span>
+                                        <span class="font-mono" id="bar-val-time">25%</span>
+                                    </div>
+                                    <div class="bcr-track">
+                                        <div class="bcr-fill fill-cyan" id="bar-fill-time" style="width: 25%;"></div>
+                                    </div>
+                                </div>
+                                <!-- Mode 3: Games Played -->
+                                <div class="bar-chart-row">
+                                    <div class="bcr-label">
+                                        <span>Games Played (Số lượng)</span>
+                                        <span class="font-mono" id="bar-val-games">10%</span>
+                                    </div>
+                                    <div class="bcr-track">
+                                        <div class="bcr-fill fill-blue" id="bar-fill-games" style="width: 10%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Milestone Claim Gauge -->
+                            <div class="milestone-gauge-wrap">
+                                <div class="mg-header">
+                                    <span class="mg-title">MỐC DANH HIỆU GIỜ CHƠI</span>
+                                    <span class="mg-curr font-mono" id="gauge-hours-label">0 / 1000h</span>
+                                </div>
+                                <div class="mg-track">
+                                    <div class="mg-fill" id="gauge-hours-fill" style="width: 2%;"></div>
+                                    <div class="mg-pins">
+                                        <span class="mg-pin p10" title="10h - Newbie">10h</span>
+                                        <span class="mg-pin p100" title="100h - Grinder">100h</span>
+                                        <span class="mg-pin p500" title="500h - Veteran">500h</span>
+                                        <span class="mg-pin p1000" title="1000h - Legend">1k</span>
+                                        <span class="mg-pin p10000" title="10000h - Cosmic">10k</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ================= DISCORD OFFICIAL "HUY HIỆU CỦA BẠN" MASTER SHOWCASE ================= -->
+                    <div class="discord-official-modal-window">
+                        <!-- Left Navigation Sidebar -->
+                        <div class="dom-sidebar">
+                            <div class="dom-sidebar-header">
+                                <h2 class="dom-title">Huy hiệu của bạn</h2>
+                                <p class="dom-sub">Duyệt huy hiệu của bạn và khám phá những món mới mà bạn có thể mở khóa.</p>
+                            </div>
+
+                            <!-- ONLY THE 2 OFFICIAL BADGES AVAILABLE IN THE SPOOFER -->
+                            <div class="dom-categories-grid two-badges-only">
+                                <button type="button" class="dom-cat-btn" data-badge-cat="games" id="cat-btn-games" title="Số trò chơi đã chơi (Game Variety)">
+                                    <img src="/static/badges/game_variety_universalist.svg" alt="Game Variety" class="cat-btn-icon-img">
+                                    <span class="cat-btn-label">Số trò chơi</span>
+                                </button>
+                                <button type="button" class="dom-cat-btn active" data-badge-cat="playtime" id="cat-btn-playtime" title="Thời gian chơi (Game Time)">
+                                    <img src="/static/badges/game_time_eternal.svg" alt="Game Time" class="cat-btn-icon-img">
+                                    <span class="cat-btn-label">Thời gian chơi</span>
+                                </button>
+                            </div>
+
+                            <button type="button" class="btn-customize-badges" id="btn-open-customize-modal">
+                                Tùy chỉnh huy hiệu của bạn
+                            </button>
+                        </div>
+
+                        <!-- Right Showcase Stage -->
+                        <div class="dom-content">
+                            <!-- Top status header -->
+                            <div class="dom-topbar-row">
+                                <span class="dom-pill-beta">BETA</span>
+                                <div class="dom-topbar-right">
+                                    <span class="dom-engine-text">Skidder by Yusei</span>
+                                </div>
+                            </div>
+
+                            <!-- Anime Hero Showcase (Sword / Gamepad) -->
+                            <div class="dom-hero-stage">
+                                <div class="anime-hero-visual-box" id="anime-hero-target">
+                                    <!-- Injected Anime SVG (Sword or Gamepad) with floating animation -->
+                                </div>
+
+                                <div class="hero-badge-meta-box">
+                                    <div class="hero-category-label" id="hero-badge-cat">Thời gian chơi</div>
+                                    <h1 class="hero-badge-title" id="hero-badge-name">VĨNH CỬU</h1>
+                                    <div class="hero-badge-meta-row">
+                                        <span id="hero-badge-accumulated">169.582 giờ chơi đã tích lũy</span>
+                                        <span class="dot-sep">•</span>
+                                        <span id="hero-badge-unlock-date">Đã mở khóa</span>
+                                        <span class="dot-sep">•</span>
+                                        <span class="pill-mythic" id="hero-badge-tier-tag">★ THẦN THOẠI</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 10 Tiers Box (Exact Replica of Discord Screenshot) -->
+                            <div class="dom-tier-card">
+                                <div class="dom-tier-alert" id="hero-tier-alert-text">
+                                    Bạn đã đạt cấp tối đa của huy hiệu này. Hãy nghỉ ngơi, thư giãn và tận hưởng quang cảnh từ trên đỉnh.
+                                </div>
+
+                                <div class="dom-tier-grid" id="hero-tier-items-grid">
+                                    <!-- Injected by JavaScript: 10 sword or gamepad tiers -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Session History Timeline -->
+                    <div class="history-section glass-panel">
+                        <div class="history-header">
+                            <div>
+                                <h3 class="hist-title">Lịch Sử Các Phiên Hoạt Động</h3>
+                                <p class="hist-sub">Lưu trữ các phiên chạy gần đây tại trình duyệt</p>
+                            </div>
+                            <button type="button" class="btn btn-outline-xs" id="btn-clear-history">Xoá lịch sử</button>
+                        </div>
+
+                        <div class="history-table-wrapper custom-scroll">
+                            <table class="history-table">
+                                <thead>
+                                    <tr>
+                                        <th>Thời gian</th>
+                                        <th>Chế độ</th>
+                                        <th>Số Game</th>
+                                        <th>Giờ Playtime</th>
+                                        <th>Thời lượng</th>
+                                        <th>Kết quả</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="history-table-body">
+                                    <!-- History rows injected here -->
+                                </tbody>
+                            </table>
+                            <div class="history-empty-placeholder" id="history-empty-msg">
+                                <span>Chưa có phiên chạy nào được ghi nhận. Bắt đầu phiên đầu tiên tại Dashboard!</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================= PAGE 4: CÀI ĐẶT (SETTINGS) ================= -->
+            <section class="page-view" id="page-settings">
+                <div class="page-content-wrapper">
+                    <div class="settings-grid">
+                        
+                        <!-- Panel 1: Theme Selector -->
+                        <div class="glass-panel settings-card">
+                            <div class="set-card-header">
+                                <div class="sch-icon badge-purple">🎨</div>
+                                <div>
+                                    <h3 class="sch-title">Chủ Đề & Giao Diện (Themes)</h3>
+                                    <p class="sch-sub">Tuỳ biến phong cách màu sắc hiển thị của toàn bộ bảng điều khiển</p>
+                                </div>
+                            </div>
+                            <div class="theme-picker-grid">
+                                <!-- Theme 1: Purple -->
+                                <button type="button" class="theme-card active" data-theme-val="purple">
+                                    <div class="tc-palette">
+                                        <span class="tc-dot" style="background: #7c5cfc;"></span>
+                                        <span class="tc-dot" style="background: #4f8ef7;"></span>
+                                        <span class="tc-dot" style="background: #030507;"></span>
+                                    </div>
+                                    <div class="tc-name">Royal Purple</div>
+                                    <div class="tc-sub">Mặc định Discord AAA</div>
+                                </button>
+
+                                <!-- Theme 2: Cyan -->
+                                <button type="button" class="theme-card" data-theme-val="cyan">
+                                    <div class="tc-palette">
+                                        <span class="tc-dot" style="background: #00d2ff;"></span>
+                                        <span class="tc-dot" style="background: #3b82f6;"></span>
+                                        <span class="tc-dot" style="background: #030507;"></span>
+                                    </div>
+                                    <div class="tc-name">Electric Cyan</div>
+                                    <div class="tc-sub">Cyberpunk Neon</div>
+                                </button>
+
+                                <!-- Theme 3: Green -->
+                                <button type="button" class="theme-card" data-theme-val="green">
+                                    <div class="tc-palette">
+                                        <span class="tc-dot" style="background: #00e5a0;"></span>
+                                        <span class="tc-dot" style="background: #10b981;"></span>
+                                        <span class="tc-dot" style="background: #030507;"></span>
+                                    </div>
+                                    <div class="tc-name">Emerald Matrix</div>
+                                    <div class="tc-sub">Hacker Green Stream</div>
+                                </button>
+
+                                <!-- Theme 4: Red -->
+                                <button type="button" class="theme-card" data-theme-val="red">
+                                    <div class="tc-palette">
+                                        <span class="tc-dot" style="background: #ff4757;"></span>
+                                        <span class="tc-dot" style="background: #f43f5e;"></span>
+                                        <span class="tc-dot" style="background: #030507;"></span>
+                                    </div>
+                                    <div class="tc-name">Crimson Velocity</div>
+                                    <div class="tc-sub">High Intensity Red</div>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Panel 2: General Preferences -->
+                        <div class="glass-panel settings-card">
+                            <div class="set-card-header">
+                                <div class="sch-icon badge-blue">⚙️</div>
+                                <div>
+                                    <h3 class="sch-title">Tuỳ Chọn Mặc Định (Defaults)</h3>
+                                    <p class="sch-sub">Cấu hình tham số mặc định mỗi khi khởi động web app</p>
+                                </div>
+                            </div>
+                            
+                            <div class="settings-form">
+                                <div class="setting-row">
+                                    <div class="sr-info">
+                                        <span class="sr-label">Số giờ mặc định mỗi game</span>
+                                        <span class="sr-hint">Giá trị ban đầu trên ô nhập giờ tại Dashboard</span>
+                                    </div>
+                                    <div class="sr-ctrl">
+                                        <input type="number" id="setting-default-hours" class="styled-input-sm font-mono" value="10" min="0.1" max="1000">
+                                    </div>
+                                </div>
+
+                                <div class="setting-row">
+                                    <div class="sr-info">
+                                        <span class="sr-label">Chế độ chạy mặc định</span>
+                                        <span class="sr-hint">Chế độ tự động chọn khi mở ứng dụng</span>
+                                    </div>
+                                    <div class="sr-ctrl">
+                                        <select id="setting-default-mode" class="styled-select-sm">
+                                            <option value="both">Both (Cả hai)</option>
+                                            <option value="playtime">Playtime Only</option>
+                                            <option value="games_played">Games Played</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="setting-row">
+                                    <div class="sr-info">
+                                        <span class="sr-label">Âm thanh phản hồi (Audio Sound FX)</span>
+                                        <span class="sr-hint">Hiệu ứng âm thanh tổng hợp thuần Web Audio API</span>
+                                    </div>
+                                    <div class="sr-ctrl">
+                                        <label class="switch-toggle">
+                                            <input type="checkbox" id="setting-toggle-sound" checked>
+                                            <span class="switch-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="setting-row">
+                                    <div class="sr-info">
+                                        <span class="sr-label">Tự động cuộn Terminal</span>
+                                        <span class="sr-hint">Tự cuộn xuống dòng mới nhất khi có log mới</span>
+                                    </div>
+                                    <div class="sr-ctrl">
+                                        <label class="switch-toggle">
+                                            <input type="checkbox" id="setting-toggle-autoscroll" checked>
+                                            <span class="switch-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Panel 3: Keyboard Shortcuts Cheatsheet -->
+                        <div class="glass-panel settings-card">
+                            <div class="set-card-header">
+                                <div class="sch-icon badge-cyan">⌨️</div>
+                                <div>
+                                    <h3 class="sch-title">Phím Tắt Tiện Dụng</h3>
+                                    <p class="sch-sub">Thao tác nhanh không cần chạm chuột</p>
+                                </div>
+                            </div>
+                            <div class="shortcuts-grid">
+                                <div class="sc-item">
+                                    <kbd>Ctrl</kbd> + <kbd>Enter</kbd>
+                                    <span>Bắt đầu / Dừng Bot</span>
+                                </div>
+                                <div class="sc-item">
+                                    <kbd>Ctrl</kbd> + <kbd>L</kbd>
+                                    <span>Xoá sạch nhật ký</span>
+                                </div>
+                                <div class="sc-item">
+                                    <kbd>Ctrl</kbd> + <kbd>1 - 5</kbd>
+                                    <span>Chuyển trang nhanh</span>
+                                </div>
+                                <div class="sc-item">
+                                    <kbd>/</kbd>
+                                    <span>Tìm kiếm trong Kho Game</span>
+                                </div>
+                                <div class="sc-item">
+                                    <kbd>Escape</kbd>
+                                    <span>Đóng mọi cửa sổ Modal</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Panel 4: Danger Zone & Export -->
+                        <div class="glass-panel settings-card border-danger">
+                            <div class="set-card-header">
+                                <div class="sch-icon badge-red">⚠️</div>
+                                <div>
+                                    <h3 class="sch-title text-danger">Quản Lý Dữ Liệu & Danger Zone</h3>
+                                    <p class="sch-sub">Sao lưu nhật ký hoặc đặt lại toàn bộ cài đặt</p>
+                                </div>
+                            </div>
+                            <div class="danger-actions-row">
+                                <button type="button" class="btn btn-outline-sm" id="btn-export-logs-txt">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                    <span>Xuất Nhật Ký (.txt)</span>
+                                </button>
+                                <button type="button" class="btn btn-danger-sm" id="btn-open-wipe-modal">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+                                    <span>Xoá Toàn Bộ Dữ Liệu</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================= PAGE 5: NHẬT KÝ (FULL TERMINAL CONSOLE) ================= -->
+            <section class="page-view" id="page-logs">
+                <div class="page-content-wrapper logs-full-wrapper">
+                    <div class="terminal-master-frame">
+                        
+                        <!-- Terminal Bar -->
+                        <div class="term-top-bar">
+                            <div class="ttb-left">
+                                <div class="term-dots">
+                                    <span class="tdot td-red"></span>
+                                    <span class="tdot td-yellow"></span>
+                                    <span class="tdot td-green"></span>
+                                </div>
+                                <span class="term-title">Discord Spoofer Science Terminal</span>
+                                <span class="term-counter-pill font-mono" id="term-counter-pill">0 logs</span>
+                            </div>
+
+                            <!-- Filter Pills & Search -->
+                            <div class="ttb-center">
+                                <div class="log-level-filters">
+                                    <button type="button" class="lf-btn active" data-level="all">Tất cả</button>
+                                    <button type="button" class="lf-btn" data-level="ok">OK</button>
+                                    <button type="button" class="lf-btn" data-level="sent">Sent</button>
+                                    <button type="button" class="lf-btn" data-level="info">Info</button>
+                                    <button type="button" class="lf-btn" data-level="warn">Warning</button>
+                                    <button type="button" class="lf-btn" data-level="err">Error</button>
+                                </div>
+                            </div>
+
+                            <div class="ttb-right">
+                                <div class="log-search-wrap">
+                                    <input type="text" id="input-log-search" class="log-search-input" placeholder="Lọc log..." autocomplete="off">
+                                </div>
+                                <button type="button" class="term-action-btn" id="btn-toggle-autoscroll" title="Bật/Tắt Tự động cuộn">
+                                    <span class="as-indicator active" id="as-indicator"></span>
+                                    <span>Tự cuộn</span>
+                                </button>
+                                <button type="button" class="term-action-btn" id="btn-export-logs" title="Tải log về máy dạng .txt">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                    <span>Xuất file</span>
+                                </button>
+                                <button type="button" class="term-action-btn btn-clear-danger" id="btn-clear-terminal" title="Xoá toàn bộ nhật ký (Ctrl+L)">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
+                                    <span>Xoá</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Terminal Body Canvas -->
+                        <div class="term-canvas custom-scroll font-mono" id="full-terminal-output" tabindex="0">
+                            <!-- Streamed logs appended here -->
+                        </div>
+
+                        <!-- Terminal Bottom Status -->
+                        <div class="term-bottom-bar font-mono">
+                            <span class="tbb-status" id="term-live-status">● SSE Connected</span>
+                            <span class="tbb-client" id="term-client-id">clientId: local</span>
+                            <span class="tbb-shortcuts">Ctrl+L = Xoá &bull; ESC = Đóng modal</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Application JavaScript Entry Point -->
+    <script src="app.js"></script>
+</body>
+</html>

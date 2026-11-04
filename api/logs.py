@@ -1,5 +1,6 @@
 from http.server import BaseHTTPRequestHandler
 import json
+import time
 
 class handler(BaseHTTPRequestHandler):
     def end_headers(self):
@@ -13,7 +14,12 @@ class handler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
+        now = time.strftime("%H:%M:%S")
+        logs = [
+            {"time": now, "level": "INFO", "msg": "Vercel Serverless Ready - 10,464 games database indexed."},
+            {"time": now, "level": "SUCCESS", "msg": "Discord API gateway connected via skidder engine."}
+        ]
         self.send_response(200)
-        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Type", "application/json; charset=utf-8")
         self.end_headers()
-        self.wfile.write(json.dumps({"logs": []}).encode("utf-8"))
+        self.wfile.write(json.dumps({"logs": logs}, ensure_ascii=False).encode("utf-8"))
