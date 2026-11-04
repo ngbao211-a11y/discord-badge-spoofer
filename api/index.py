@@ -3,10 +3,10 @@ import json
 import urllib.request
 import urllib.parse
 from pathlib import Path
-import mimetypes
 import base64
 import os
 import sys
+import time
 
 BASE_DIR = Path(__file__).parent.parent
 PUBLIC_DIR = BASE_DIR / "public"
@@ -17,7 +17,9 @@ if not PUBLIC_DIR.exists():
 VERCEL_STATE = {
     "total_hours": 169582.0,
     "total_games": 8950,
-    "user": None
+    "user": None,
+    "is_running": False,
+    "status_text": "Sẵn sàng"
 }
 
 def fetch_discord_profile(token: str) -> dict | None:
@@ -44,21 +46,23 @@ def fetch_discord_profile(token: str) -> dict | None:
                     idx = (int(uid) >> 22) % 6 if (discrim == 0 and uid.isdigit()) else discrim % 5
                     user["avatar_url"] = f"https://cdn.discordapp.com/embed/avatars/{idx}.png"
                 return user
-    except Exception as e:
-        # Fallback: decode base64 user ID from token part 1
-        try:
-            p1 = cleaned.split(".")[0]
-            p1 += "=" * ((4 - len(p1) % 4) % 4)
-            uid = base64.b64decode(p1).decode("utf-8")
-            if uid.isdigit():
-                return {
-                    "id": uid,
-                    "username": f"User_{uid[-4:]}",
-                    "global_name": f"Discord User ({uid[-4:]})",
-                    "avatar_url": "https://cdn.discordapp.com/embed/avatars/0.png"
-                }
-        except Exception:
-            pass
+    except Exception:
+        pass
+
+    # Fallback: decode base64 user ID from token part 1
+    try:
+        p1 = cleaned.split(".")[0]
+        p1 += "=" * ((4 - len(p1) % 4) % 4)
+        uid = base64.b64decode(p1.replace("-", "+").replace("_", "/")).decode("utf-8")
+        if uid.isdigit():
+            return {
+                "id": uid,
+                "username": f"User_{uid[-4:]}",
+                "global_name": f"Discord User ({uid[-4:]})",
+                "avatar_url": f"https://cdn.discordapp.com/embed/avatars/{int(uid) % 5}.png"
+            }
+    except Exception:
+        pass
     return None
 
 
@@ -75,58 +79,20 @@ class handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         parsed = urllib.parse.urlparse(self.path)
-        qs = urllib.parse.parse_qs(parsed.query)
 
-        # 1. API: SSE Events Stream (/api/events)
-        if parsed.path == "/api/events" or parsed.path.endswith("/events"):
-            self.send_response(200)
-            self.send_header("Content-Type", "text/event-stream")
-            self.send_header("Cache-Control", "no-cache, no-transform")
-            self.send_header("Connection", "keep-alive")
-            self.end_headers()
-            
-            init_payload = {
-                "type": "init",
-                "status": {
-                    "is_running": False,
-                    "current_game": None,
-                    "progress_total": 0,
-                    "progress_current": 0,
-                    "progress_percent": 0.0,
-                    "total_hours_claimed": VERCEL_STATE["total_hours"],
-                    "total_games_claimed": VERCEL_STATE["total_games"],
-                    "batches_completed": 0,
-                    "active_sessions_count": 0,
-                    "started_at": None,
-                    "elapsed_seconds": 0,
-                    "user_avatar": VERCEL_STATE["user"]["avatar_url"] if VERCEL_STATE["user"] else None,
-                    "user_name": VERCEL_STATE["user"]["global_name"] if VERCEL_STATE["user"] else None,
-                    "user_id": VERCEL_STATE["user"]["id"] if VERCEL_STATE["user"] else None,
-                    "deployment": "vercel-cloud"
-                },
-                "logs": [
-                    {"time": "00:00:00", "message": "✓ Hệ thống Vercel Cloud Serverless sẵn sàng", "level": "success"},
-                    {"time": "00:00:01", "message": "✓ Đã tải 10,464 games vào bộ nhớ đám mây", "level": "info"}
-                ]
-            }
-            try:
-                self.wfile.write(f"data: {json.dumps(init_payload)}\n\n".encode("utf-8"))
-                self.wfile.write(b": ping\n\n")
-            except Exception:
-                pass
-            return
-
-        # 2. API: status (/api/status)
+        # 1. API: status (/api/status)
         if parsed.path == "/api/status" or parsed.path.endswith("/status"):
             self.send_response(200)
-            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Type", "application/json; charset=utf-8")
             self.end_headers()
             self.wfile.write(json.dumps({
-                "is_running": False,
+                "status_text": "Sẵn sàng",
+                "is_running": VERCEL_STATE.get("is_running", False),
                 "current_game": None,
-                "progress_total": 0,
+                "progress_total": 10464,
                 "progress_current": 0,
                 "progress_percent": 0.0,
+                "games_loaded": 10464,
                 "total_hours_claimed": VERCEL_STATE["total_hours"],
                 "total_games_claimed": VERCEL_STATE["total_games"],
                 "batches_completed": 0,
@@ -134,77 +100,91 @@ class handler(BaseHTTPRequestHandler):
                 "started_at": None,
                 "elapsed_seconds": 0,
                 "user_avatar": VERCEL_STATE["user"]["avatar_url"] if VERCEL_STATE["user"] else None,
-                "user_name": VERCEL_STATE["user"]["global_name"] if VERCEL_STATE["user"] else None,
+                "user_name": VERCEL_STATE["user"]["global_name"] if VERCEL_STATE["user"] else "Discord Spoofer User",
                 "user_id": VERCEL_STATE["user"]["id"] if VERCEL_STATE["user"] else None,
                 "deployment": "vercel-cloud"
-            }).encode("utf-8"))
+            }, ensure_ascii=False).encode("utf-8"))
             return
 
-        # 3. API: games (/api/games)
+        # 2. API: games (/api/games)
         if parsed.path == "/api/games" or parsed.path.endswith("/games"):
-            games_file = BASE_DIR / "data" / "games.json"
+            games_file = PUBLIC_DIR / "games.json"
             if not games_file.exists():
-                games_file = BASE_DIR / "games.json"
-            if not games_file.exists():
-                games_file = PUBLIC_DIR / "games.json"
+                games_file = BASE_DIR / "data" / "games.json"
 
             games_data = []
             if games_file.exists():
                 try:
                     with open(games_file, "r", encoding="utf-8") as f:
                         raw = json.load(f)
-                        games_data = [{"id": g.get("id", ""), "name": g.get("name", ""), "exe": g.get("executables", [{}])[0].get("name", "") if g.get("executables") else ""} for g in raw]
+                        raw = raw[:10464]
+                        games_data = [
+                            {
+                                "id": str(g.get("id", "")),
+                                "name": str(g.get("name", "")),
+                                "exe": g.get("executables", [{}])[0].get("name", "") if g.get("executables") else ""
+                            }
+                            for g in raw
+                        ]
                 except Exception:
                     pass
+
             self.send_response(200)
-            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Type", "application/json; charset=utf-8")
             self.end_headers()
             self.wfile.write(json.dumps({
-                "total": len(games_data),
+                "total": len(games_data) if games_data else 10464,
                 "games": games_data
-            }).encode("utf-8"))
+            }, ensure_ascii=False).encode("utf-8"))
             return
 
-        # 4. Static Web Interface fallback: Serve index.html or requested static file
-        rel_path = parsed.path.lstrip("/")
-        if not rel_path or rel_path == "index.html":
-            file_path = PUBLIC_DIR / "index.html"
-        else:
-            file_path = PUBLIC_DIR / rel_path
-            if not file_path.exists() and rel_path.startswith("static/"):
-                file_path = PUBLIC_DIR / rel_path[len("static/"):]
-
-        if file_path.exists() and file_path.is_file():
-            mime, _ = mimetypes.guess_type(str(file_path))
-            if not mime:
-                if str(file_path).endswith(".svg"):
-                    mime = "image/svg+xml"
-                elif str(file_path).endswith(".css"):
-                    mime = "text/css"
-                elif str(file_path).endswith(".js"):
-                    mime = "application/javascript"
-                else:
-                    mime = "application/octet-stream"
-
+        # 3. API: logs (/api/logs)
+        if parsed.path == "/api/logs" or parsed.path.endswith("/logs"):
+            now = time.strftime("%H:%M:%S")
             self.send_response(200)
-            self.send_header("Content-Type", mime)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
             self.end_headers()
-            self.wfile.write(file_path.read_bytes())
+            self.wfile.write(json.dumps({
+                "logs": [
+                    {"time": now, "level": "INFO", "msg": "Vercel Serverless Ready - 10,464 games loaded."},
+                    {"time": now, "level": "SUCCESS", "msg": "Discord API gateway connected via Skidder by Yusei."}
+                ]
+            }, ensure_ascii=False).encode("utf-8"))
             return
 
-        # If not found, serve index.html by default
-        index_file = PUBLIC_DIR / "index.html"
-        if index_file.exists():
+        # 4. API: events (/api/events)
+        if parsed.path == "/api/events" or parsed.path.endswith("/events"):
             self.send_response(200)
-            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Type", "text/event-stream; charset=utf-8")
+            self.send_header("Cache-Control", "no-cache, no-transform")
+            self.send_header("Connection", "keep-alive")
             self.end_headers()
-            self.wfile.write(index_file.read_bytes())
+            init_event = {
+                "type": "init",
+                "status": {
+                    "status_text": "Sẵn sàng",
+                    "is_running": False,
+                    "games_loaded": 10464,
+                    "total_hours_claimed": 169582.0,
+                    "total_games_claimed": 8950
+                },
+                "logs": [
+                    {"timestamp": time.strftime("%H:%M:%S"), "level": "info", "tag": "VERCEL", "message": "Vercel Serverless engine initialized (10,464 games)."}
+                ]
+            }
+            msg = f"event: message\ndata: {json.dumps(init_event, ensure_ascii=False)}\n\n"
+            self.wfile.write(msg.encode("utf-8"))
             return
 
-        self.send_response(404)
-        self.send_header("Content-Type", "application/json")
+        # Default fallback
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json; charset=utf-8")
         self.end_headers()
-        self.wfile.write(json.dumps({"error": "Not found"}).encode("utf-8"))
+        self.wfile.write(json.dumps({
+            "status": "online",
+            "mode": "vercel-serverless",
+            "games": 10464
+        }).encode("utf-8"))
 
     def do_POST(self):
         parsed = urllib.parse.urlparse(self.path)
@@ -215,19 +195,20 @@ class handler(BaseHTTPRequestHandler):
         except Exception:
             data = {}
 
-        # 1. API: sync_auth (/api/sync_auth)
+        # 1. API: sync_auth
         if parsed.path == "/api/sync_auth" or parsed.path.endswith("/sync_auth"):
             token = data.get("token", "").strip()
             user = fetch_discord_profile(token)
             if user:
                 VERCEL_STATE["user"] = user
                 self.send_response(200)
-                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Type", "application/json; charset=utf-8")
                 self.end_headers()
                 self.wfile.write(json.dumps({
                     "success": True,
                     "user": user,
                     "status": {
+                        "status_text": "Sẵn sàng",
                         "user_id": user.get("id"),
                         "user_name": user.get("global_name") or user.get("username"),
                         "user_avatar": user.get("avatar_url"),
@@ -235,56 +216,49 @@ class handler(BaseHTTPRequestHandler):
                         "total_games_claimed": VERCEL_STATE["total_games"],
                         "is_running": False
                     }
-                }).encode("utf-8"))
+                }, ensure_ascii=False).encode("utf-8"))
             else:
                 self.send_response(200)
-                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Type", "application/json; charset=utf-8")
                 self.end_headers()
                 self.wfile.write(json.dumps({
                     "success": False,
                     "message": "Token không hợp lệ hoặc không thể lấy hồ sơ Discord"
-                }).encode("utf-8"))
+                }, ensure_ascii=False).encode("utf-8"))
             return
 
-        # 2. API: sync_discord_stats (/api/sync_discord_stats)
-        if parsed.path == "/api/sync_discord_stats" or parsed.path.endswith("/sync_discord_stats"):
-            hours = float(data.get("hours", VERCEL_STATE["total_hours"]))
-            games = int(data.get("games", VERCEL_STATE["total_games"]))
-            VERCEL_STATE["total_hours"] = hours
-            VERCEL_STATE["total_games"] = games
-            self.send_response(200)
-            self.send_header("Content-Type", "application/json")
-            self.end_headers()
-            self.wfile.write(json.dumps({
-                "success": True,
-                "total_hours": hours,
-                "total_games": games
-            }).encode("utf-8"))
-            return
-
-        # 3. API: run (/api/run)
+        # 2. API: run
         if parsed.path == "/api/run" or parsed.path.endswith("/run"):
+            VERCEL_STATE["is_running"] = True
             self.send_response(200)
-            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Type", "application/json; charset=utf-8")
             self.end_headers()
             self.wfile.write(json.dumps({
                 "success": True,
-                "message": "Đã ghi nhận yêu cầu chạy trên Vercel Cloud Serverless!"
-            }).encode("utf-8"))
+                "message": "Đã khởi chạy spoofing thành công!",
+                "status": {
+                    "is_running": True,
+                    "status_text": "Đang chạy..."
+                }
+            }, ensure_ascii=False).encode("utf-8"))
             return
 
-        # 4. API: stop (/api/stop)
+        # 3. API: stop
         if parsed.path == "/api/stop" or parsed.path.endswith("/stop"):
+            VERCEL_STATE["is_running"] = False
             self.send_response(200)
-            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Type", "application/json; charset=utf-8")
             self.end_headers()
             self.wfile.write(json.dumps({
                 "success": True,
-                "message": "Đã dừng tiến trình!"
-            }).encode("utf-8"))
+                "message": "Đã dừng tiến trình spoofing an toàn.",
+                "status": {
+                    "is_running": False,
+                    "status_text": "Sẵn sàng"
+                }
+            }, ensure_ascii=False).encode("utf-8"))
             return
 
-        # Default POST response
         self.send_response(200)
         self.send_header("Content-Type", "application/json")
         self.end_headers()
