@@ -1,0 +1,2 @@
+# Discord Badge Spoofer - Dependencies
+# No external packages required; uses stdlib only
