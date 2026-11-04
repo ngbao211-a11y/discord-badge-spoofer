@@ -1,16 +1,7 @@
 {
   "version": 2,
+  "outputDirectory": "public",
   "rewrites": [
-    { "source": "/api/status",           "destination": "/api/status.py" },
-    { "source": "/api/events",           "destination": "/api/events.py" },
-    { "source": "/api/games",            "destination": "/api/games.py" },
-    { "source": "/api/sync_auth",        "destination": "/api/sync_auth.py" },
-    { "source": "/api/run",              "destination": "/api/run.py" },
-    { "source": "/api/stop",             "destination": "/api/stop.py" },
-    { "source": "/api/logs",             "destination": "/api/logs.py" },
-    { "source": "/static/badges/:file",  "destination": "/public/badges/:file" },
-    { "source": "/static/:file",         "destination": "/public/:file" },
-    { "source": "/",                     "destination": "/public/index.html" },
-    { "source": "/(.*)",                 "destination": "/public/$1" }
+    { "source": "/static/(.*)", "destination": "/$1" }
   ]
 }
