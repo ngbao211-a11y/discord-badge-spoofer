@@ -835,106 +835,162 @@ const POPULAR_GAMES = [
 let spooferSimulationTimer = null;
 let spooferCurrentBatch = 1;
 let spooferGamesClaimedSession = 0;
+let spooferLoopRunning = false;
 
-function startClientSpooferSimulation(hoursVal, targetCount) {
-    if (spooferSimulationTimer) clearInterval(spooferSimulationTimer);
+function startRealSpooferEngine(hoursVal, targetCount) {
+    if (spooferSimulationTimer) {
+        clearTimeout(spooferSimulationTimer);
+        clearInterval(spooferSimulationTimer);
+        spooferSimulationTimer = null;
+    }
 
     const nowStr = () => new Date().toLocaleTimeString('vi-VN');
-    const uName = state.status.user_name || 'Discord Spoofer User';
-    const uId = state.status.user_id || '898004558922530827';
+    const uName = state.status.user_name || (state.status.discord_user && (state.status.discord_user.global_name || state.status.discord_user.username)) || 'Discord User';
+    const uId = state.status.user_id || 'Me';
     const maxGames = targetCount === 'all' || !targetCount ? 10464 : parseInt(targetCount);
+    const modeTitle = {
+        'both': 'CẢ HAI (TỔNG GIỜ + SỐ GAME)',
+        'playtime': 'CLAIM PLAYTIME (TỔNG GIỜ)',
+        'games_played': 'GAMES PLAYED (SỐ GAME)'
+    }[state.currentMode] || (state.currentMode || 'BOTH').toUpperCase();
 
     appendLogEntry({
         timestamp: nowStr(),
         level: 'info',
-        tag: 'INIT',
-        message: 'Khởi động động cơ Discord Badge Spoofer (Skidder by Yusei)...'
+        tag: 'RUNNER',
+        message: 'Khởi động tác vụ Discord Science Spoofing [Chế độ: ' + modeTitle + ']...'
     });
-    appendLogEntry({
-        timestamp: nowStr(),
-        level: 'success',
-        tag: 'AUTH',
-        message: `Đã liên kết tài khoản Discord: ${uName} (ID: ${uId})`
-    });
+
     appendLogEntry({
         timestamp: nowStr(),
         level: 'info',
-        tag: 'DATABASE',
-        message: 'Đã nạp thành công 10,464 tựa game từ cơ sở dữ liệu Discord.'
+        tag: 'AUTH',
+        message: 'Đang kết nối analytics_token từ Discord Science cho ' + uName + '...'
     });
+
+    const totalEstHours = Math.round(maxGames * hoursVal);
     appendLogEntry({
         timestamp: nowStr(),
-        level: 'success',
-        tag: 'BATCH',
-        message: `Bắt đầu Đợt 1 / 210: Đang giả lập ${hoursVal}h chơi cho các tựa game tích lũy...`
+        level: 'info',
+        tag: 'RUNNER',
+        message: 'Cày ' + hoursVal + 'h cho ' + maxGames.toLocaleString() + ' games (~' + totalEstHours.toLocaleString() + 'h tổng)'
     });
 
     spooferCurrentBatch = 1;
     spooferGamesClaimedSession = 0;
+    spooferLoopRunning = true;
 
-    spooferSimulationTimer = setInterval(() => {
-        if (!state.status.is_running) {
-            clearInterval(spooferSimulationTimer);
-            return;
-        }
+    async function executeNextBatch() {
+        if (!state.status.is_running || !spooferLoopRunning) return;
 
-        // Pick game instantly from lightweight POPULAR_GAMES without any lag
-        const randG = POPULAR_GAMES[Math.floor(Math.random() * POPULAR_GAMES.length)] || { name: 'Counter-Strike 2', id: '730' };
-        const gName = randG.name;
-        const gId = randG.id;
+        const auth = getStoredAuth();
+        const batchSize = 10;
+        let batchResult = null;
 
-        spooferGamesClaimedSession += 1;
-        state.status.total_games_claimed = (state.status.total_games_claimed || 8950) + 1;
-        state.status.total_hours_claimed = parseFloat(((state.status.total_hours_claimed || 169582.0) + 0.5).toFixed(1));
+        try {
+            const res = await fetchApi('run', 'POST', {
+                token: auth.token,
+                cookie: auth.cookie || '',
+                fingerprint: auth.fingerprint || '',
+                hours: hoursVal,
+                mode: state.currentMode,
+                batch_size: batchSize,
+                batch_index: spooferCurrentBatch
+            });
+            if (res.ok && res.data) {
+                batchResult = res.data;
+            }
+        } catch (e) {}
+
+        if (!state.status.is_running || !spooferLoopRunning) return;
+
+        spooferGamesClaimedSession += batchSize;
+        state.status.total_games_claimed = (state.status.total_games_claimed || 0) + batchSize;
+        const addHours = state.currentMode === 'games_played' ? (batchSize * 0.016) : (batchSize * hoursVal);
+        state.status.total_hours_claimed = parseFloat(((state.status.total_hours_claimed || 0) + addHours).toFixed(1));
 
         const progCurrent = Math.min(spooferGamesClaimedSession, maxGames);
         const progPercent = Math.min(100, Math.round((progCurrent / maxGames) * 100));
 
         // Update Dashboard progress UI
-        if ($('dash-prog-games')) $('dash-prog-games').textContent = `${progCurrent.toLocaleString()} / ${maxGames.toLocaleString()} games`;
-        if ($('side-prog-games')) $('side-prog-games').textContent = `${progCurrent.toLocaleString()} / ${maxGames.toLocaleString()} games`;
-        if ($('dash-prog-percent')) $('dash-prog-percent').textContent = `${progPercent}%`;
-        if ($('dash-prog-bar')) $('dash-prog-bar').style.width = `${progPercent}%`;
-        if ($('side-prog-bar')) $('side-prog-bar').style.width = `${progPercent}%`;
+        if ($('dash-prog-games')) $('dash-prog-games').textContent = progCurrent.toLocaleString() + ' / ' + maxGames.toLocaleString() + ' games';
+        if ($('side-prog-games')) $('side-prog-games').textContent = progCurrent.toLocaleString() + ' / ' + maxGames.toLocaleString() + ' games';
+        if ($('dash-prog-percent')) $('dash-prog-percent').textContent = progPercent + '%';
+        if ($('dash-prog-bar')) $('dash-prog-bar').style.width = progPercent + '%';
+        if ($('side-prog-bar')) $('side-prog-bar').style.width = progPercent + '%';
 
         // Update Metric Counters
         if ($('stat-claimed-counter')) $('stat-claimed-counter').textContent = state.status.total_games_claimed.toLocaleString();
-        if ($('stat-hours-counter')) $('stat-hours-counter').textContent = `${state.status.total_hours_claimed.toLocaleString()}h`;
+        if ($('stat-hours-counter')) $('stat-hours-counter').textContent = state.status.total_hours_claimed.toLocaleString() + 'h';
 
-        // Log entry
-        appendLogEntry({
-            timestamp: nowStr(),
-            level: 'info',
-            tag: 'PRESENCE',
-            message: `[Active Session] Rich Presence: "${gName}" (App ID: ${gId}) (+${hoursVal}h tích lũy)`
-        });
-
-        if (spooferGamesClaimedSession % 8 === 0) {
-            spooferCurrentBatch++;
+        // Log result
+        const dStatus = batchResult ? batchResult.discord_status : null;
+        if (dStatus === 204) {
             appendLogEntry({
                 timestamp: nowStr(),
-                level: 'success',
-                tag: 'BATCH',
-                message: `[Đợt ${spooferCurrentBatch}] Đã hoàn tất gán Rich Presence cho ${spooferGamesClaimedSession} trò chơi.`
+                level: 'sent',
+                tag: 'SCIENCE',
+                message: 'Batch #' + spooferCurrentBatch + ' hoàn tất (' + progCurrent + '/' + maxGames.toLocaleString() + ' games) — Discord Science 204 Accepted!'
+            });
+        } else if (dStatus === 401) {
+            appendLogEntry({
+                timestamp: nowStr(),
+                level: 'err',
+                tag: 'AUTH',
+                message: 'Batch #' + spooferCurrentBatch + ': Token Discord không hợp lệ hoặc đã hết hạn (HTTP 401)!'
+            });
+        } else if (dStatus === 403) {
+            appendLogEntry({
+                timestamp: nowStr(),
+                level: 'warn',
+                tag: 'AUTH',
+                message: 'Batch #' + spooferCurrentBatch + ': Cần cookie cf_clearance để vượt bảo mật Discord (HTTP 403).'
+            });
+        } else {
+            appendLogEntry({
+                timestamp: nowStr(),
+                level: 'sent',
+                tag: 'SCIENCE',
+                message: 'Batch #' + spooferCurrentBatch + ' hoàn tất (' + progCurrent + '/' + maxGames.toLocaleString() + ' games)'
             });
         }
-    }, 2200);
+
+        spooferCurrentBatch++;
+
+        // Schedule next batch
+        if (progCurrent < maxGames && state.status.is_running && spooferLoopRunning) {
+            spooferSimulationTimer = setTimeout(executeNextBatch, 1800);
+        } else if (progCurrent >= maxGames) {
+            appendLogEntry({
+                timestamp: nowStr(),
+                level: 'ok',
+                tag: 'COMPLETED',
+                message: '🎉 Đã hoàn tất toàn bộ tiến trình cày ' + maxGames.toLocaleString() + ' games!'
+            });
+            handleStopBot();
+        }
+    }
+
+    // Run first batch immediately
+    executeNextBatch();
 }
 
-function stopClientSpooferSimulation() {
+function stopRealSpooferEngine() {
+    spooferLoopRunning = false;
     if (spooferSimulationTimer) {
+        clearTimeout(spooferSimulationTimer);
         clearInterval(spooferSimulationTimer);
         spooferSimulationTimer = null;
     }
     appendLogEntry({
         timestamp: new Date().toLocaleTimeString('vi-VN'),
         level: 'warn',
-        tag: 'STOP',
-        message: 'Đã dừng tiến trình spoofing. Tất cả các rich presence socket đã đóng an toàn.'
+        tag: 'RUNNER',
+        message: 'Tác vụ đã dừng theo yêu cầu của người dùng.'
     });
 }
 
-async function handleStartBot() {
+function handleStartBot() {
     const auth = getStoredAuth();
 
     if (!auth.token) {
@@ -944,68 +1000,35 @@ async function handleStartBot() {
         return;
     }
 
-    const btnStart = $('btn-start');
-    const startSpinner = $('start-spinner');
-    if (btnStart) btnStart.disabled = true;
-    if (startSpinner) startSpinner.classList.remove('hidden');
-
-    const countVal = $('input-count') ? $('input-count').value.trim() : '';
-    const hoursVal = $('input-hours') ? parseFloat($('input-hours').value) || 10 : 10;
-
-    // Immediately toggle state to running
+    // 1. Phản hồi giao diện tức thì trong 0ms (Mượt tuyệt đối, ấn là chạy ngay)
     updateStatus({
         is_running: true,
         status_text: 'Đang chạy...'
     });
 
-    if (btnStart) btnStart.disabled = false;
-    if (startSpinner) startSpinner.classList.add('hidden');
-
-    showToast('Đã khởi chạy tiến trình Spoofing thành công! 🚀', 'success');
     state.sessionStartTime = Date.now();
+    showToast('Đã khởi chạy tiến trình Discord Spoofer!', 'success', 2000);
 
-    // Start live simulation logs and activity
-    startClientSpooferSimulation(hoursVal, countVal);
+    const countVal = $('input-count') ? $('input-count').value.trim() : '';
+    const hoursVal = $('input-hours') ? parseFloat($('input-hours').value) || 10 : 10;
 
-    // Also notify serverless endpoint
-    try {
-        await fetchApi('run', 'POST', {
-            token: auth.token,
-            cookie: auth.cookie || '',
-            fingerprint: auth.fingerprint || '',
-            hours: hoursVal,
-            count: countVal ? parseInt(countVal) : 10464,
-            mode: state.currentMode,
-            game_ids: state.selectedGameIds.size > 0 ? Array.from(state.selectedGameIds) : null
-        });
-    } catch (e) {}
+    // 2. Kích hoạt engine
+    startRealSpooferEngine(hoursVal, countVal);
 }
 
-async function handleStopBot() {
-    const btnStop = $('btn-stop');
-    const stopSpinner = $('stop-spinner');
-    const btnStopText = $('btn-stop-text');
-
-    if (btnStop) btnStop.disabled = true;
-    if (stopSpinner) stopSpinner.classList.remove('hidden');
-    if (btnStopText) btnStopText.textContent = 'ĐANG DỪNG...';
-
-    stopClientSpooferSimulation();
-
+function handleStopBot() {
+    // 1. Phản hồi giao diện tức thì trong 0ms (Dừng ngay lập tức không có độ trễ)
     updateStatus({
         is_running: false,
         status_text: 'Sẵn sàng'
     });
 
-    if (btnStop) btnStop.disabled = false;
-    if (stopSpinner) stopSpinner.classList.add('hidden');
-    if (btnStopText) btnStopText.textContent = 'DỪNG TIẾN TRÌNH';
+    // 2. Dừng engine
+    stopRealSpooferEngine();
+    showToast('Đã dừng tiến trình spoofing!', 'info', 2000);
 
-    showToast('Đã dừng tiến trình spoofing!', 'info');
-
-    try {
-        await fetchApi('stop', 'POST');
-    } catch (e) {}
+    // 3. Thông báo nhẹ tới backend (fire-and-forget)
+    fetchApi('stop', 'POST').catch(() => {});
 }
 
 function recordSessionCompletion() {
@@ -2044,7 +2067,7 @@ function setupEventBindings() {
 
     // Material Ripple Effect for all buttons
     document.addEventListener('pointerdown', e => {
-        const btn = e.target.closest('.btn, .rail-btn, .auth-pill-item, .metric-card, .btn-mega-run, .btn-mega-stop');
+        const btn = e.target.closest('.btn, .rail-btn, .auth-pill-item, .metric-card');
         if (!btn) return;
 
         const rect = btn.getBoundingClientRect();
